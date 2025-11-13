@@ -8,13 +8,12 @@ import {
   Calendar,
   Edit,
   Trash2,
-  Activity,
   TrendingUp,
   Clock,
 } from 'lucide-react'
 import { projectService, Project } from '../services/projectService'
 import { locationService, ActiveUser } from '../services/locationService'
-import { mapService, DrawingMap } from '../services/mapService'
+import { mapService } from '../services/mapService'
 import { fileService } from '../services/fileService'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import toast from 'react-hot-toast'
@@ -25,8 +24,6 @@ export default function ProjectDetailsPage() {
   const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([])
-  const [drawingMap, setDrawingMap] = useState<DrawingMap | null>(null)
-  const [fileCount, setFileCount] = useState(0)
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalDrawings: 0,
