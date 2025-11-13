@@ -8,12 +8,13 @@ import {
   Calendar,
   Edit,
   Trash2,
+  Activity,
   TrendingUp,
   Clock,
 } from 'lucide-react'
 import { projectService, Project } from '../services/projectService'
 import { locationService, ActiveUser } from '../services/locationService'
-import { mapService } from '../services/mapService'
+import { mapService, DrawingMap } from '../services/mapService'
 import { fileService } from '../services/fileService'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import toast from 'react-hot-toast'
@@ -24,6 +25,8 @@ export default function ProjectDetailsPage() {
   const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([])
+  const [drawingMap, setDrawingMap] = useState<DrawingMap | null>(null)
+  const [fileCount, setFileCount] = useState(0)
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalDrawings: 0,
@@ -43,20 +46,38 @@ export default function ProjectDetailsPage() {
 
     try {
       setLoading(true)
-      const [projectData, users, drawings, fileStats] = await Promise.all([
+      const [projectData, users, drawings, files] = await Promise.all([
         projectService.getProject(projectId),
         locationService.getActiveUsers(projectId).catch(() => []),
         mapService.getDrawingMap(projectId).catch(() => null),
-        fileService.getFileStats().catch(() => ({ totalFiles: 0, totalSize: 0, totalDirectories: 0, fileTypes: {} })),
+        fileService.listFiles().catch(() => []),
       ])
 
       setProject(projectData)
       setActiveUsers(users)
+      setDrawingMap(drawings)
+
+      // Count files recursively
+      const countFiles = (nodes: any[]): number => {
+        let count = 0
+        nodes.forEach((node) => {
+          if (node.type === 'file') {
+            count++
+          }
+          if (node.children) {
+            count += countFiles(node.children)
+          }
+        })
+        return count
+      }
+
+      const fileCount = countFiles(files)
+      setFileCount(fileCount)
 
       setStats({
         totalUsers: users.length,
         totalDrawings: drawings ? 1 : 0,
-        totalFiles: fileStats.totalFiles,
+        totalFiles: fileCount,
       })
 
       if (projectData) {
@@ -348,3 +369,4 @@ export default function ProjectDetailsPage() {
     </div>
   )
 }
+
