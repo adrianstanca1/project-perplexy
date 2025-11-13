@@ -10,6 +10,9 @@ import ProjectDetailsPage from './pages/ProjectDetailsPage'
 import LiveMapPage from './pages/LiveMapPage'
 import SettingsPage from './pages/SettingsPage'
 import ExecutionHistoryPage from './pages/ExecutionHistoryPage'
+import DeveloperSandboxPage from './pages/DeveloperSandboxPage'
+import MarketplacePage from './pages/MarketplacePage'
+import MyAppDesktopPage from './pages/MyAppDesktopPage'
 
 function App() {
   return (
@@ -26,6 +29,9 @@ function App() {
               <Route path="map" element={<LiveMapPage />} />
               <Route path="history" element={<ExecutionHistoryPage />} />
               <Route path="settings" element={<SettingsPage />} />
+              <Route path="sandbox" element={<DeveloperSandboxPage />} />
+              <Route path="marketplace" element={<MarketplacePage />} />
+              <Route path="desktop" element={<MyAppDesktopPage />} />
             </Route>
           </Routes>
           <Toaster

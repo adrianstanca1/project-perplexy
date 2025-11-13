@@ -10,6 +10,8 @@ import { executionHistoryRouter } from './routes/executionHistoryRoutes.js'
 import { locationRouter } from './routes/locationRoutes.js'
 import { mapRouter } from './routes/mapRoutes.js'
 import { projectRouter } from './routes/projectRoutes.js'
+import { marketplaceRouter } from './routes/marketplaceRoutes.js'
+import { desktopRouter } from './routes/desktopRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { websocketService } from './services/websocketService.js'
 
@@ -33,6 +35,8 @@ app.use('/api/execution-history', executionHistoryRouter)
 app.use('/api/location', locationRouter)
 app.use('/api/maps', mapRouter)
 app.use('/api/projects', projectRouter)
+app.use('/api/marketplace', marketplaceRouter)
+app.use('/api/desktop', desktopRouter)
 
 // Health check
 app.get('/health', (_req, res) => {

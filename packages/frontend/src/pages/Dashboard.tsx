@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Activity, Folder, Map, Users, FileText, TrendingUp, Clock } from 'lucide-react'
+import { Activity, Folder, Map, Users, FileText, TrendingUp, Clock, Code as CodeIcon, Package, Desktop } from 'lucide-react'
 import { projectService, Project } from '../services/projectService'
 import { locationService } from '../services/locationService'
 import { fileService } from '../services/fileService'
@@ -130,53 +130,68 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <Link
-                        to="/map"
-                        className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-primary-500 transition-colors group"
-                    >
-                        <div className="flex items-center space-x-4">
-                            <div className="p-3 bg-primary-500 bg-opacity-20 rounded-lg group-hover:bg-primary-500 transition-colors">
-                                <Map className="w-6 h-6 text-primary-400 group-hover:text-white" />
+                    {/* Quick Actions */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <Link
+                            to="/sandbox"
+                            className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-primary-500 transition-colors group"
+                        >
+                            <div className="flex items-center space-x-4">
+                                <div className="p-3 bg-purple-500 bg-opacity-20 rounded-lg group-hover:bg-purple-500 transition-colors">
+                                    <CodeIcon className="w-6 h-6 text-purple-400 group-hover:text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-1">Developer Sandbox</h3>
+                                    <p className="text-gray-400 text-sm">Create and publish apps</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="text-lg font-semibold mb-1">Live Project Map</h3>
-                                <p className="text-gray-400 text-sm">View real-time project tracking</p>
-                            </div>
-                        </div>
-                    </Link>
+                        </Link>
 
-                    <Link
-                        to="/files"
-                        className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-primary-500 transition-colors group"
-                    >
-                        <div className="flex items-center space-x-4">
-                            <div className="p-3 bg-blue-500 bg-opacity-20 rounded-lg group-hover:bg-blue-500 transition-colors">
-                                <Folder className="w-6 h-6 text-blue-400 group-hover:text-white" />
+                        <Link
+                            to="/marketplace"
+                            className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-primary-500 transition-colors group"
+                        >
+                            <div className="flex items-center space-x-4">
+                                <div className="p-3 bg-orange-500 bg-opacity-20 rounded-lg group-hover:bg-orange-500 transition-colors">
+                                    <Package className="w-6 h-6 text-orange-400 group-hover:text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-1">Marketplace</h3>
+                                    <p className="text-gray-400 text-sm">Discover and install apps</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="text-lg font-semibold mb-1">File Manager</h3>
-                                <p className="text-gray-400 text-sm">Manage project files</p>
-                            </div>
-                        </div>
-                    </Link>
+                        </Link>
 
-                    <Link
-                        to="/projects"
-                        className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-primary-500 transition-colors group"
-                    >
-                        <div className="flex items-center space-x-4">
-                            <div className="p-3 bg-green-500 bg-opacity-20 rounded-lg group-hover:bg-green-500 transition-colors">
-                                <Activity className="w-6 h-6 text-green-400 group-hover:text-white" />
+                        <Link
+                            to="/desktop"
+                            className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-primary-500 transition-colors group"
+                        >
+                            <div className="flex items-center space-x-4">
+                                <div className="p-3 bg-blue-500 bg-opacity-20 rounded-lg group-hover:bg-blue-500 transition-colors">
+                                    <Desktop className="w-6 h-6 text-blue-400 group-hover:text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-1">myAppDesktop</h3>
+                                    <p className="text-gray-400 text-sm">Virtual desktop environment</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="text-lg font-semibold mb-1">Projects</h3>
-                                <p className="text-gray-400 text-sm">Manage construction projects</p>
+                        </Link>
+
+                        <Link
+                            to="/map"
+                            className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-primary-500 transition-colors group"
+                        >
+                            <div className="flex items-center space-x-4">
+                                <div className="p-3 bg-green-500 bg-opacity-20 rounded-lg group-hover:bg-green-500 transition-colors">
+                                    <Map className="w-6 h-6 text-green-400 group-hover:text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-1">Live Project Map</h3>
+                                    <p className="text-gray-400 text-sm">View real-time project tracking</p>
+                                </div>
                             </div>
-                        </div>
-                    </Link>
-                </div>
+                        </Link>
+                    </div>
 
                 {/* Recent Projects */}
                 <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">

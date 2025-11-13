@@ -1,11 +1,14 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
-import { Folder, Play, Map, LayoutDashboard, Settings, Building2, History } from 'lucide-react'
+import { Folder, Play, Map, LayoutDashboard, Settings, Building2, History, Code, Package, Desktop } from 'lucide-react'
 
 export default function MainLayout() {
   const location = useLocation()
 
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/sandbox', icon: Code, label: 'Developer Sandbox' },
+    { to: '/marketplace', icon: Package, label: 'Marketplace' },
+    { to: '/desktop', icon: Desktop, label: 'myAppDesktop' },
     { to: '/interpreter', icon: Play, label: 'Interpreter' },
     { to: '/files', icon: Folder, label: 'Files' },
     { to: '/projects', icon: Building2, label: 'Projects' },
