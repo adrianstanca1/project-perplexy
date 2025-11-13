@@ -1,0 +1,31 @@
+{
+  "name": "code-interpreter-app",
+  "version": "1.0.0",
+  "description": "Full-featured code interpreter web application",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:backend\"",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "build": "pnpm --filter shared build && pnpm --filter backend build && pnpm --filter frontend build",
+    "build:production": "NODE_ENV=production pnpm build",
+    "start": "concurrently \"pnpm start:frontend\" \"pnpm start:backend\"",
+    "start:frontend": "pnpm --filter frontend start",
+    "start:backend": "pnpm --filter backend start",
+    "type-check": "pnpm --filter shared type-check && pnpm --filter backend type-check && pnpm --filter frontend type-check",
+    "lint": "pnpm --filter shared lint && pnpm --filter backend lint && pnpm --filter frontend lint",
+    "test:unit": "pnpm --filter shared test && pnpm --filter backend test && pnpm --filter frontend test",
+    "clean": "pnpm --filter shared clean && pnpm --filter backend clean && pnpm --filter frontend clean"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

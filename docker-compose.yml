@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./packages/backend/Dockerfile
+    container_name: code-interpreter-backend
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      FILE_STORAGE_PATH: /app/packages/backend/storage
+      MAX_FILE_SIZE: 10485760
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./packages/backend/storage:/app/packages/backend/storage
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./packages/frontend/Dockerfile
+      args:
+        VITE_API_URL: ""
+        VITE_WS_URL: ""
+    container_name: code-interpreter-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  storage_data:
