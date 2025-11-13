@@ -1,14 +1,18 @@
-# Code Interpreter Web Application
+# Developer Platform - Sandbox, Marketplace & Desktop Environment
 
-A full-featured code interpreter web application with file management capabilities, built with React, TypeScript, Node.js, and Express.
+A comprehensive developer platform featuring a sandbox environment for creating apps, a marketplace for discovering and installing apps, and a virtual desktop environment (myAppDesktop) for running apps. Built with React, TypeScript, Node.js, and Express.
 
-## Features
+## Core Features
 
-- 🎨 **Modern UI**: Beautiful, responsive interface built with React and Tailwind CSS
+- 🧪 **Developer Sandbox**: Create, test, and publish apps with support for Python, JavaScript, TypeScript, HTML, and CSS
+- 🛒 **Marketplace**: Discover, install, and manage apps - all apps are free
+- 🖥️ **myAppDesktop**: Virtual desktop environment with window manager, taskbar, and app launcher
 - 💻 **Code Editor**: Monaco Editor with syntax highlighting and IntelliSense
-- 🐍 **Code Execution**: Execute Python and JavaScript code
+- 🐍 **Code Execution**: Execute Python, JavaScript, and TypeScript code
 - 📁 **File Management**: Create, edit, delete, and organize files
 - 🔄 **Real-time Output**: See execution results in real-time
+- 📨 **Messaging System**: Inter-app communication and inbox system
+- 🗺️ **Live Project Map**: Real-time construction project tracking with dual map views
 - 🐳 **Docker Support**: Easy deployment with Docker Compose
 - 📦 **Monorepo Structure**: Organized with pnpm workspaces
 
@@ -136,9 +140,29 @@ project perplexy/
 
 ## API Endpoints
 
+### Developer Sandbox & Marketplace
+- `GET /api/marketplace/apps` - List marketplace apps
+- `GET /api/marketplace/apps/:appId` - Get app details
+- `POST /api/marketplace/apps` - Publish app to marketplace
+- `POST /api/marketplace/apps/:appId/install` - Install app
+- `DELETE /api/marketplace/apps/:appId/install` - Uninstall app
+- `GET /api/marketplace/installed` - Get installed apps
+- `GET /api/marketplace/my-apps` - Get my published apps
+
+### Desktop Environment
+- `GET /api/desktop/apps` - Get installed desktop apps
+- `POST /api/desktop/apps/install` - Install app to desktop
+- `DELETE /api/desktop/apps/:appId` - Uninstall app from desktop
+- `PUT /api/desktop/apps/:appId/window` - Update window state
+- `POST /api/desktop/apps/:appId/execute` - Execute app
+- `GET /api/desktop/messages` - Get desktop messages
+- `POST /api/desktop/messages` - Send message
+- `PUT /api/desktop/messages/:messageId/read` - Mark message as read
+
 ### File Management
 - `GET /api/files` - List files
 - `GET /api/files/content?path=<path>` - Get file content
+- `GET /api/files/stats` - Get file statistics
 - `POST /api/files` - Create file
 - `PUT /api/files` - Update file
 - `DELETE /api/files?path=<path>` - Delete file
@@ -147,6 +171,19 @@ project perplexy/
 ### Code Execution
 - `POST /api/execute` - Execute code
 - `POST /api/execute/stop` - Stop execution
+- `GET /api/execution-history` - Get execution history
+- `DELETE /api/execution-history` - Clear execution history
+
+### Projects & Location
+- `GET /api/projects` - List projects
+- `POST /api/projects` - Create project
+- `GET /api/projects/:projectId` - Get project
+- `PUT /api/projects/:projectId` - Update project
+- `DELETE /api/projects/:projectId` - Delete project
+- `POST /api/location/update` - Update user location
+- `GET /api/location/active-users` - Get active users
+- `POST /api/maps/upload-drawing` - Upload PDF drawing
+- `GET /api/maps/drawing/:projectId` - Get drawing map
 
 ## Environment Variables
 
