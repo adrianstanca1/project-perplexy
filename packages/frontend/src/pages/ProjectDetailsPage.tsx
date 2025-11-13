@@ -43,38 +43,20 @@ export default function ProjectDetailsPage() {
 
     try {
       setLoading(true)
-      const [projectData, users, drawings, files] = await Promise.all([
+      const [projectData, users, drawings, fileStats] = await Promise.all([
         projectService.getProject(projectId),
         locationService.getActiveUsers(projectId).catch(() => []),
         mapService.getDrawingMap(projectId).catch(() => null),
-        fileService.listFiles().catch(() => []),
+        fileService.getFileStats().catch(() => ({ totalFiles: 0, totalSize: 0, totalDirectories: 0, fileTypes: {} })),
       ])
 
       setProject(projectData)
       setActiveUsers(users)
-      setDrawingMap(drawings)
-
-      // Count files recursively
-      const countFiles = (nodes: any[]): number => {
-        let count = 0
-        nodes.forEach((node) => {
-          if (node.type === 'file') {
-            count++
-          }
-          if (node.children) {
-            count += countFiles(node.children)
-          }
-        })
-        return count
-      }
-
-      const fileCount = countFiles(files)
-      setFileCount(fileCount)
 
       setStats({
         totalUsers: users.length,
         totalDrawings: drawings ? 1 : 0,
-        totalFiles: fileCount,
+        totalFiles: fileStats.totalFiles,
       })
 
       if (projectData) {
