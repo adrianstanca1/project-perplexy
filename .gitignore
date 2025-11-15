@@ -41,4 +41,5 @@ prisma/migrations/
 .firebase/
 .firebaserc
 firebase-debug.log
+storage/
 
