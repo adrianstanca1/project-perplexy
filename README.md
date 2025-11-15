@@ -187,6 +187,17 @@ npm run test:coverage
 
 ## 📦 Deployment
 
+### Frontend Deployment (Vercel)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/adrianstanca1/project-perplexy)
+
+Deploy the frontend to Vercel with one click, or follow the [Vercel Deployment Guide](./VERCEL_DEPLOYMENT.md) for detailed instructions.
+
+**Quick Deploy:**
+```bash
+vercel --prod
+```
+
 ### Production Checklist
 
 - [ ] Set environment variables
