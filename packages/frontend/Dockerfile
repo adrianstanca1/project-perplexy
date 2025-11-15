@@ -21,15 +21,11 @@ RUN npm run build
 # Production image with Nginx
 FROM nginx:alpine
 
-# Copy built files
+# Copy built files (includes sw.js, manifest.json, and all other assets)
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy service worker and manifest
-COPY public/sw.js /usr/share/nginx/html/sw.js
-COPY public/manifest.json /usr/share/nginx/html/manifest.json
 
 # Expose port
 EXPOSE 80
