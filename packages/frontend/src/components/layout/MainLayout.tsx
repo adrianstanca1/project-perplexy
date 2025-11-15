@@ -64,7 +64,7 @@ export default function MainLayout() {
           <h1 className="text-xl font-bold text-primary-400">ConstructAI</h1>
           <p className="text-xs text-gray-400 mt-1">Construction Management</p>
         </div>
-        
+
         {/* User Info */}
         {user && (
           <div className="p-4 border-b border-gray-700">
