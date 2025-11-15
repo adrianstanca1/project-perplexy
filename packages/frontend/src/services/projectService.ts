@@ -1,9 +1,4 @@
-import axios from 'axios'
-
-// Use relative URL when VITE_API_URL is empty (for Docker/nginx proxying)
-// If VITE_API_URL is explicitly set to empty string, use relative URLs
-// Otherwise, default to localhost for development
-const API_URL = import.meta.env.VITE_API_URL === '' ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:3001')
+import { getApiClient } from './apiClient'
 
 export interface Project {
   id: string
@@ -24,18 +19,18 @@ const parseProject = (project: any): Project => {
 
 export const projectService = {
   async getProjects(): Promise<Project[]> {
-    const response = await axios.get(`${API_URL}/api/projects`)
+    const response = await getApiClient().get('/projects')
     const projects = response.data.projects || []
     return projects.map(parseProject)
   },
 
   async getProject(projectId: string): Promise<Project> {
-    const response = await axios.get(`${API_URL}/api/projects/${projectId}`)
+    const response = await getApiClient().get(`/projects/${projectId}`)
     return parseProject(response.data.project)
   },
 
   async createProject(name: string, description?: string): Promise<Project> {
-    const response = await axios.post(`${API_URL}/api/projects`, {
+    const response = await getApiClient().post('/projects', {
       name,
       description,
     })
@@ -43,7 +38,7 @@ export const projectService = {
   },
 
   async updateProject(projectId: string, name?: string, description?: string): Promise<Project> {
-    const response = await axios.put(`${API_URL}/api/projects/${projectId}`, {
+    const response = await getApiClient().put(`/projects/${projectId}`, {
       name,
       description,
     })
@@ -51,7 +46,7 @@ export const projectService = {
   },
 
   async deleteProject(projectId: string): Promise<void> {
-    await axios.delete(`${API_URL}/api/projects/${projectId}`)
+    await getApiClient().delete(`/projects/${projectId}`)
   },
 }
 

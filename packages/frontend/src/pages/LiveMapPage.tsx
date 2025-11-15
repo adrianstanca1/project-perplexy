@@ -151,7 +151,7 @@ export default function LiveMapPage() {
   }, [user, selectedProjectId, loadActiveUsers])
 
   // WebSocket for real-time updates
-  const { isConnected: isWsConnected } = useWebSocket({
+  const { isConnected: isWsConnected, lastErrorMessage: wsErrorMessage } = useWebSocket({
     projectId: selectedProjectId,
     onMessage: (message) => {
       if (message.type === 'location_update' || message.type === 'active_users') {
@@ -174,6 +174,7 @@ export default function LiveMapPage() {
       console.error('WebSocket error:', error)
     },
     reconnect: true,
+    getAuthToken: () => (typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null),
   })
 
   // Load projects on mount
@@ -413,6 +414,11 @@ export default function LiveMapPage() {
               userCount={filteredUsers.length}
               lastUpdate={lastUpdate}
             />
+            {!isWsConnected && wsErrorMessage && (
+              <div className="text-xs text-red-400 max-w-xs truncate">
+                {wsErrorMessage}
+              </div>
+            )}
             {geolocationError && (
               <div className="text-red-400 text-sm">Location Error: {geolocationError.message}</div>
             )}

@@ -5,6 +5,8 @@
 
 import { useState, useEffect } from 'react'
 
+type ServiceWorkerStatus = 'unknown' | 'registering' | 'ready' | 'error'
+
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
@@ -13,11 +15,13 @@ interface BeforeInstallPromptEvent extends Event {
 export function usePWA() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isInstalled, setIsInstalled] = useState(false)
-  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [isOnline, setIsOnline] = useState(globalThis.navigator?.onLine ?? true)
+  const [serviceWorkerStatus, setServiceWorkerStatus] = useState<ServiceWorkerStatus>('unknown')
+  const [serviceWorkerError, setServiceWorkerError] = useState<string | null>(null)
 
   useEffect(() => {
     // Check if app is already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    if (globalThis.matchMedia?.('(display-mode: standalone)').matches) {
       setIsInstalled(true)
     }
 
@@ -37,28 +41,41 @@ export function usePWA() {
     const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    window.addEventListener('appinstalled', handleAppInstalled)
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
+    globalThis.addEventListener?.('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
+    globalThis.addEventListener?.('appinstalled', handleAppInstalled as EventListener)
+    globalThis.addEventListener?.('online', handleOnline)
+    globalThis.addEventListener?.('offline', handleOffline)
 
-    // Register service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((registration) => {
-          console.log('Service Worker registered:', registration)
+    const handleSwStatus = (event: Event) => {
+      const detail = (event as CustomEvent<{ status: ServiceWorkerStatus; error?: string }>).detail
+      if (!detail) return
+      setServiceWorkerStatus(detail.status)
+      setServiceWorkerError(detail.error || null)
+      if (detail.status === 'ready') {
+        setIsInstalled(globalThis.matchMedia?.('(display-mode: standalone)').matches ?? false)
+      }
+    }
+
+    globalThis.addEventListener?.('sw-status', handleSwStatus as EventListener)
+
+    if ('serviceWorker' in globalThis.navigator) {
+      globalThis.navigator.serviceWorker.ready
+        .then(() => {
+          setServiceWorkerStatus('ready')
         })
         .catch((error) => {
-          console.error('Service Worker registration failed:', error)
+          console.error('Service worker ready check failed', error)
+          setServiceWorkerStatus('error')
+          setServiceWorkerError(error?.message || 'Service worker failed to start')
         })
     }
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-      window.removeEventListener('appinstalled', handleAppInstalled)
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
+      globalThis.removeEventListener?.('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
+      globalThis.removeEventListener?.('appinstalled', handleAppInstalled as EventListener)
+      globalThis.removeEventListener?.('online', handleOnline)
+      globalThis.removeEventListener?.('offline', handleOffline)
+      globalThis.removeEventListener?.('sw-status', handleSwStatus as EventListener)
     }
   }, [])
 
@@ -82,6 +99,8 @@ export function usePWA() {
     installPrompt,
     isInstalled,
     isOnline,
+    serviceWorkerStatus,
+    serviceWorkerError,
     installApp,
   }
 }

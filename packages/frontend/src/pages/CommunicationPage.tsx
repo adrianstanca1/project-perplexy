@@ -3,7 +3,7 @@
  * Real-time chat with project context preservation
  */
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { communicationService } from '../services/communicationService'
 import { useAuth } from '../contexts/AuthContext'
 import { Send, Paperclip, Smile, Video, Phone, MoreVertical } from 'lucide-react'
@@ -17,50 +17,102 @@ export default function CommunicationPage() {
   const [messages, setMessages] = useState<any[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [socketStatus, setSocketStatus] = useState<'idle' | 'connecting' | 'connected' | 'disconnected'>('idle')
+  const [socketError, setSocketError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const socketRef = useRef<Socket | null>(null)
 
+  const loadThreads = useCallback(async () => {
+    try {
+      const response = await communicationService.getThreads()
+      const fetchedThreads = response.threads || []
+      setThreads(fetchedThreads)
+      setSelectedThread((prev) => prev || fetchedThreads[0] || null)
+    } catch (error) {
+      toast.error('Failed to load threads')
+    }
+  }, [])
+
   useEffect(() => {
     loadThreads()
+  }, [loadThreads])
 
-    // Initialize Socket.IO connection
-    if (!socketRef.current) {
-      socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:3001', {
-        transports: ['websocket'],
-      })
-    }
+  useEffect(() => {
+    if (!user) return
+    const apiBase =
+      import.meta.env.VITE_API_URL === ''
+        ? window.location.origin
+        : import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
-    const socket = socketRef.current
+    setSocketStatus('connecting')
+    setSocketError(null)
 
-    // Socket.IO listeners
+    const storedToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+
+    const socket = io(apiBase, {
+      transports: ['websocket'],
+      auth: {
+        token: storedToken,
+        userId: user.id,
+      },
+      query: {
+        userId: user.id,
+      },
+    })
+    socketRef.current = socket
+
     socket.on('connect', () => {
-      console.log('Connected to server')
-      if (user?.id) {
-        socket.emit('join', user.id)
-      }
+      setSocketStatus('connected')
+      setSocketError(null)
+      socket.emit('join', {
+        userId: user.id,
+        projectIds: user.projectIds || [],
+      })
     })
 
-    socket.on('message:new', (message) => {
+    socket.on('disconnect', (reason) => {
+      setSocketStatus('disconnected')
+      setSocketError(typeof reason === 'string' ? reason : 'Disconnected')
+    })
+
+    socket.on('connect_error', (err) => {
+      setSocketStatus('disconnected')
+      setSocketError(err?.message || 'Connection error')
+    })
+
+    return () => {
+      socket.disconnect()
+      socketRef.current = null
+      setSocketStatus('idle')
+    }
+  }, [user])
+
+  useEffect(() => {
+    const socket = socketRef.current
+    if (!socket) return
+
+    const handleNewMessage = (message: any) => {
       if (message.threadId === selectedThread?.id) {
         setMessages((prev) => [...prev, message])
       }
-      // Update thread list
       loadThreads()
-    })
+    }
 
-    socket.on('message:typing', (data) => {
+    const handleTypingEvent = (data: any) => {
       if (data.threadId === selectedThread?.id && data.userId !== user?.id) {
         setIsTyping(true)
         setTimeout(() => setIsTyping(false), 3000)
       }
-    })
+    }
+
+    socket.on('message:new', handleNewMessage)
+    socket.on('message:typing', handleTypingEvent)
 
     return () => {
-      socket.off('message:new')
-      socket.off('message:typing')
-      socket.off('connect')
+      socket.off('message:new', handleNewMessage)
+      socket.off('message:typing', handleTypingEvent)
     }
-  }, [selectedThread, user])
+  }, [selectedThread, user, loadThreads])
 
   useEffect(() => {
     if (selectedThread && socketRef.current) {
@@ -186,6 +238,16 @@ export default function CommunicationPage() {
                 <h3 className="text-lg font-semibold">{selectedThread.title}</h3>
                 <div className="text-sm text-gray-400">
                   {selectedThread.participants?.length || 0} participants
+                </div>
+                <div className="text-xs mt-1">
+                  <span className={socketStatus === 'connected' ? 'text-green-400' : 'text-yellow-400'}>
+                    Realtime: {socketStatus}
+                  </span>
+                  {socketError && (
+                    <span className="text-red-400 ml-2">
+                      {socketError}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="flex gap-2">

@@ -15,7 +15,15 @@ export default function FieldOperationsPage() {
     enableHighAccuracy: true,
     watch: true,
   })
-  const { isOnline, queueLength, isSyncing, triggerSync } = useOfflineSync()
+  const {
+    isOnline,
+    queueLength,
+    isSyncing,
+    triggerSync,
+    serviceWorkerReady,
+    lastSyncResult,
+    lastSyncError,
+  } = useOfflineSync()
   const [selectedType, setSelectedType] = useState<string>('DAILY_REPORT')
   const [description, setDescription] = useState('')
   const [images, setImages] = useState<string[]>([])
@@ -169,6 +177,16 @@ export default function FieldOperationsPage() {
             {isSyncing ? 'Syncing...' : 'Sync'}
           </button>
         )}
+      </div>
+      <div className="mb-4 text-xs text-gray-400 space-y-1">
+        <div>Service Worker: {serviceWorkerReady ? 'Ready' : 'Registering...'}</div>
+        {lastSyncResult && (
+          <div>
+            Last Sync: {lastSyncResult.synced} sent
+            {lastSyncResult.failed > 0 && `, ${lastSyncResult.failed} failed`}
+          </div>
+        )}
+        {lastSyncError && <div className="text-red-400">{lastSyncError}</div>}
       </div>
 
       {/* Location Status */}

@@ -1,10 +1,12 @@
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom'
 import { Folder, Play, Map, LayoutDashboard, Settings, Building2, History, Code, Package, Monitor, FileText, Truck, FileSignature, Mail, Calendar, Users, Sparkles, MessageSquare, Workflow, BarChart3, Calculator, Plug, ClipboardList, LogOut, Shield } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
+import { useConnectivityStatus } from '../../hooks/useConnectivityStatus'
 
 export default function MainLayout() {
   const location = useLocation()
   const { user, hasPermission, logout, getDashboardRoute, loading } = useAuth()
+  const connectivity = useConnectivityStatus()
 
   // Show loading state
   if (loading) {
@@ -64,7 +66,7 @@ export default function MainLayout() {
           <h1 className="text-xl font-bold text-primary-400">ConstructAI</h1>
           <p className="text-xs text-gray-400 mt-1">Construction Management</p>
         </div>
-        
+
         {/* User Info */}
         {user && (
           <div className="p-4 border-b border-gray-700">
@@ -146,6 +148,26 @@ export default function MainLayout() {
 
       {/* Main Content */}
       <main className="flex-1 overflow-hidden">
+        {connectivity.state !== 'online' && (
+          <div
+            className={`px-4 py-2 text-sm flex items-center justify-between ${
+              connectivity.state === 'offline'
+                ? 'bg-red-900 text-red-100'
+                : 'bg-yellow-900 text-yellow-100'
+            }`}
+          >
+            <span>
+              {connectivity.state === 'offline'
+                ? 'Unable to reach ConstructAI services. Some features may be unavailable.'
+                : 'Connectivity degraded. Retrying connection...'}
+            </span>
+            {connectivity.lastError && (
+              <span className="ml-4 text-xs opacity-80 truncate max-w-xs">
+                {connectivity.lastError}
+              </span>
+            )}
+          </div>
+        )}
         <Outlet />
       </main>
     </div>

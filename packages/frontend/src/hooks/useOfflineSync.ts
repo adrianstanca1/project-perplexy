@@ -15,24 +15,39 @@ interface OfflineQueueItem {
   body?: any
 }
 
+const selectWorker = (registration: ServiceWorkerRegistration) =>
+  registration.active || registration.waiting || registration.installing
+
 export function useOfflineSync() {
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [queueLength, setQueueLength] = useState(0)
   const [isSyncing, setIsSyncing] = useState(false)
+  const [serviceWorkerReady, setServiceWorkerReady] = useState(false)
+  const [lastSyncResult, setLastSyncResult] = useState<{ synced: number; failed: number } | null>(null)
+  const [lastSyncError, setLastSyncError] = useState<string | null>(null)
 
   const updateQueueLength = useCallback(async () => {
-    if ('serviceWorker' in navigator) {
+    if (!('serviceWorker' in navigator)) {
+      setQueueLength(0)
+      return
+    }
+
+    try {
       const registration = await navigator.serviceWorker.ready
       const channel = new MessageChannel()
-      
+
       channel.port1.onmessage = (event) => {
         setQueueLength(event.data.queue?.length || 0)
       }
 
-      registration.active?.postMessage(
-        { type: 'GET_QUEUE' },
-        [channel.port2]
-      )
+      const worker = selectWorker(registration)
+      if (!worker) {
+        console.warn('Service worker not active when requesting queue')
+        return
+      }
+      worker.postMessage({ type: 'GET_QUEUE' }, [channel.port2])
+    } catch (error) {
+      console.error('Failed to read offline queue', error)
     }
   }, [])
 
@@ -40,43 +55,72 @@ export function useOfflineSync() {
     const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
 
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
+    globalThis.addEventListener?.('online', handleOnline)
+    globalThis.addEventListener?.('offline', handleOffline)
 
-    // Check for service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(() => {
-        navigator.serviceWorker.addEventListener('message', (event) => {
-          if (event.data.type === 'SYNC_COMPLETE') {
+    let isMounted = true
+    let swMessageHandler: ((event: MessageEvent) => void) | null = null
+
+    const attachServiceWorker = async () => {
+      if (!('serviceWorker' in navigator)) return
+      try {
+        await navigator.serviceWorker.ready
+        if (!isMounted) return
+        setServiceWorkerReady(true)
+        swMessageHandler = (event: MessageEvent) => {
+          if (event.data?.type === 'SYNC_COMPLETE') {
             setIsSyncing(false)
+            setLastSyncError(null)
+            setLastSyncResult(event.data.results)
             updateQueueLength()
           }
-        })
-      })
+        }
+        navigator.serviceWorker.addEventListener('message', swMessageHandler)
+      } catch (error) {
+        console.error('Service worker not ready:', error)
+        setServiceWorkerReady(false)
+      }
     }
+
+    attachServiceWorker()
 
     updateQueueLength()
 
     return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
+      globalThis.removeEventListener?.('online', handleOnline)
+      globalThis.removeEventListener?.('offline', handleOffline)
+      isMounted = false
+      if (swMessageHandler && 'serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', swMessageHandler)
+      }
     }
   }, [updateQueueLength])
 
   const queueRequest = useCallback(async (item: Omit<OfflineQueueItem, 'id' | 'timestamp'>) => {
-    if ('serviceWorker' in navigator) {
+    if (!('serviceWorker' in navigator)) {
+      return false
+    }
+
+    try {
       const registration = await navigator.serviceWorker.ready
       const channel = new MessageChannel()
 
-      return new Promise((resolve) => {
+      return await new Promise<boolean>((resolve, reject) => {
         channel.port1.onmessage = (event) => {
           if (event.data.success) {
             updateQueueLength()
             resolve(true)
+          } else {
+            reject(new Error(event.data.error || 'Failed to queue request'))
           }
         }
 
-        registration.active?.postMessage(
+        const worker = selectWorker(registration)
+        if (!worker) {
+          reject(new Error('Service worker not active'))
+          return
+        }
+        worker.postMessage(
           {
             type: 'QUEUE_REQUEST',
             item,
@@ -84,6 +128,9 @@ export function useOfflineSync() {
           [channel.port2]
         )
       })
+    } catch (error) {
+      console.error('Failed to queue offline request', error)
+      return false
     }
   }, [updateQueueLength])
 
@@ -93,28 +140,39 @@ export function useOfflineSync() {
     }
 
     setIsSyncing(true)
-    const registration = await navigator.serviceWorker.ready
-    const channel = new MessageChannel()
+    setLastSyncError(null)
+    try {
+      const registration = await navigator.serviceWorker.ready
+      const channel = new MessageChannel()
 
-    channel.port1.onmessage = (event) => {
-      if (event.data.success) {
-        // Sync registered, will complete in background
+      channel.port1.onmessage = (event) => {
+        if (event.data.success) {
+          // Sync registered, will complete in background
+        }
       }
-    }
 
-    registration.active?.postMessage(
-      { type: 'TRIGGER_SYNC' },
-      [channel.port2]
-    )
+      const worker = selectWorker(registration)
+      if (!worker) {
+        throw new Error('No active service worker available')
+      }
+      worker.postMessage({ type: 'TRIGGER_SYNC' }, [channel.port2])
+    } catch (error) {
+      console.error('Failed to trigger background sync', error)
+      setLastSyncError('Background sync unavailable')
+      setIsSyncing(false)
+    }
 
     // Also try direct sync if online
     if (isOnline) {
       try {
-        await fieldService.syncOfflineData()
-        setIsSyncing(false)
+        const result = await fieldService.syncOfflineData()
+        setLastSyncResult(result)
         updateQueueLength()
-      } catch (error) {
+      } catch (error: any) {
         console.error('Direct sync failed:', error)
+        setLastSyncError(error?.message || 'Sync failed')
+      } finally {
+        setIsSyncing(false)
       }
     }
   }, [isOnline, updateQueueLength])
@@ -123,6 +181,9 @@ export function useOfflineSync() {
     isOnline,
     queueLength,
     isSyncing,
+    serviceWorkerReady,
+    lastSyncResult,
+    lastSyncError,
     queueRequest,
     triggerSync,
     updateQueueLength,

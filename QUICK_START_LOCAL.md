@@ -19,25 +19,26 @@ pnpm dev
 ### Step 3: Access the Application
 
 Open your browser and navigate to:
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:3001
-- **Health Check**: http://localhost:3001/health
+
+- **Frontend**: <http://localhost:3000>
+- **Backend API**: <http://localhost:3001>
+- **Health Check**: <http://localhost:3001/health>
 
 ## 📋 Available Pages
 
 Once the application is running, you can access:
 
-1. **Code Interpreter** - http://localhost:3000/
+1. **Code Interpreter** - <http://localhost:3000/>
    - Write and execute Python/JavaScript code
    - View output in real-time
    - Save and load files
 
-2. **File Manager** - http://localhost:3000/files
+2. **File Manager** - <http://localhost:3000/files>
    - Create, edit, and delete files
    - Organize files in folders
    - Save changes with Monaco Editor
 
-3. **Live Project Map** - http://localhost:3000/map
+3. **Live Project Map** - <http://localhost:3000/map>
    - Upload construction drawing PDFs
    - View virtual map (from drawings)
    - View real map (from GPS)
@@ -96,18 +97,20 @@ VITE_API_URL=http://localhost:3001
 VITE_WS_URL=ws://localhost:3001/ws
 ```
 
+> **Tip:** When serving the frontend behind the same domain as the backend (e.g., nginx or Docker compose), set both `VITE_API_URL` and `VITE_WS_URL` to empty strings (`""`). The app will automatically fall back to relative `/api` and `/ws` routes, ensuring cookie/token forwarding works through your proxy.
+
 ## 🧪 Testing Features
 
 ### Test Code Execution
 
-1. Navigate to http://localhost:3000/
+1. Navigate to <http://localhost:3000/>
 2. Write Python code: `print("Hello, World!")`
 3. Click "Run"
 4. View output in the output panel
 
 ### Test File Management
 
-1. Navigate to http://localhost:3000/files
+1. Navigate to <http://localhost:3000/files>
 2. Create a new file
 3. Write some code
 4. Save the file
@@ -115,7 +118,7 @@ VITE_WS_URL=ws://localhost:3001/ws
 
 ### Test Live Map
 
-1. Navigate to http://localhost:3000/map
+1. Navigate to <http://localhost:3000/map>
 2. Select your role (Manager, Foreman, or Labour)
 3. Allow location access when prompted
 4. Upload a PDF drawing (optional)
@@ -159,9 +162,8 @@ pnpm install
 - Read [COMPLETE_IMPLEMENTATION.md](./COMPLETE_IMPLEMENTATION.md) for implementation details
 - Read [README.md](./README.md) for project overview
 
-## 🎉 Success!
+## 🎉 Success
 
 Your application is now running locally and ready for testing!
 
 For more information, see the complete documentation in the project root.
-
