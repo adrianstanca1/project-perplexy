@@ -6,6 +6,29 @@ This document provides instructions for deploying the frontend application to Ve
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/adrianstanca1/project-perplexy)
 
+## Automated Deployment (GitHub Actions)
+
+The repository includes a GitHub Actions workflow (`.github/workflows/vercel-deploy.yml`) that automatically deploys to Vercel on every push to `main` or pull request.
+
+### Setup Automated Deployment
+
+1. **Get your Vercel credentials:**
+   - Go to [Vercel Dashboard](https://vercel.com/account/tokens)
+   - Create a new token and copy it
+   - Note your Organization ID and Project ID from your project settings
+
+2. **Add GitHub Secrets:**
+   - Go to your GitHub repository → Settings → Secrets and variables → Actions
+   - Add the following secrets:
+     - `VERCEL_TOKEN`: Your Vercel token
+     - `VERCEL_ORG_ID`: Your Vercel organization ID
+     - `VERCEL_PROJECT_ID`: Your Vercel project ID
+
+3. **Automatic deployment:**
+   - Production: Pushes to `main` branch deploy to production
+   - Preview: Pull requests deploy to preview environments
+   - Manual: Use the "Actions" tab → "Deploy to Vercel" → "Run workflow"
+
 ## Manual Deployment
 
 ### Prerequisites
