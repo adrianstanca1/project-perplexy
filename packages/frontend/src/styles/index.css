@@ -1,9 +1,9 @@
+@import './leaflet.css';
+@import './uk-construction-theme.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import './leaflet.css';
-@import './uk-construction-theme.css';
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;

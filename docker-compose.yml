@@ -1,50 +1,80 @@
 version: '3.8'
 
 services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: constructai-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-changeme}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-constructai}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - constructai-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: constructai-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - constructai-network
+
+  # Backend API
   backend:
     build:
-      context: .
-      dockerfile: ./packages/backend/Dockerfile
-    container_name: code-interpreter-backend
-    environment:
-      NODE_ENV: production
-      PORT: 3001
-      FILE_STORAGE_PATH: /app/packages/backend/storage
-      MAX_FILE_SIZE: 10485760
+      context: ./packages/backend
+      dockerfile: Dockerfile
+    container_name: constructai-backend
+    restart: unless-stopped
     ports:
       - "3001:3001"
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3001
+      DATABASE_URL: ${DATABASE_URL:-mongodb://mongodb:27017/constructai}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      JWT_SECRET: ${JWT_SECRET:-change-this-in-production}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+    depends_on:
+      - mongodb
+      - redis
     volumes:
-      - ./packages/backend/storage:/app/packages/backend/storage
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    restart: unless-stopped
+      - ./packages/backend/uploads:/app/uploads
     networks:
-      - app-network
+      - constructai-network
 
+  # Frontend
   frontend:
     build:
-      context: .
-      dockerfile: ./packages/frontend/Dockerfile
-      args:
-        VITE_API_URL: ""
-        VITE_WS_URL: ""
-    container_name: code-interpreter-frontend
-    ports:
-      - "3000:3000"
-    depends_on:
-      backend:
-        condition: service_healthy
+      context: ./packages/frontend
+      dockerfile: Dockerfile
+    container_name: constructai-frontend
     restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+    depends_on:
+      - backend
     networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
+      - constructai-network
 
 volumes:
-  storage_data:
+  mongodb_data:
+  redis_data:
+
+networks:
+  constructai-network:
+    driver: bridge

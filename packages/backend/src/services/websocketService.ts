@@ -46,7 +46,7 @@ export const websocketService = {
           const data = JSON.parse(message.toString())
 
           switch (data.type) {
-            case 'subscribe':
+            case 'subscribe': {
               // Subscribe to project updates
               client.projectId = data.projectId
               // Send current active users
@@ -61,6 +61,7 @@ export const websocketService = {
                 })
               )
               break
+            }
 
             case 'ping':
               // Heartbeat

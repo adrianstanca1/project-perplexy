@@ -1,227 +1,248 @@
-# Developer Platform - Sandbox, Marketplace & Desktop Environment
+# ConstructAI - Production-Grade Construction Intelligence Platform
 
-A comprehensive developer platform featuring a sandbox environment for creating apps, a marketplace for discovering and installing apps, and a virtual desktop environment (myAppDesktop) for running apps. Built with React, TypeScript, Node.js, and Express.
+A comprehensive, multi-tenant construction management platform with AI-driven automation, real-time synchronization, and offline-capable field operations.
 
-## Core Features
+## 🚀 Features
 
-- 🧪 **Developer Sandbox**: Create, test, and publish apps with support for Python, JavaScript, TypeScript, HTML, and CSS
-- 🛒 **Marketplace**: Discover, install, and manage apps - all apps are free
-- 🖥️ **myAppDesktop**: Virtual desktop environment with window manager, taskbar, and app launcher
-- 💻 **Code Editor**: Monaco Editor with syntax highlighting and IntelliSense
-- 🐍 **Code Execution**: Execute Python, JavaScript, and TypeScript code
-- 📁 **File Management**: Create, edit, delete, and organize files
-- 🔄 **Real-time Output**: See execution results in real-time
-- 📨 **Messaging System**: Inter-app communication and inbox system
-- 🗺️ **Live Project Map**: Real-time construction project tracking with dual map views
-- 🐳 **Docker Support**: Easy deployment with Docker Compose
-- 📦 **Monorepo Structure**: Organized with pnpm workspaces
+### Core Platform
+- **Multi-Tenant Architecture**: Complete data isolation with organization-level scoping
+- **Role-Based Access Control**: Four distinct user roles (Super Admin, Company Admin, Supervisor, Operative)
+- **Real-Time Synchronization**: Socket.IO for bidirectional communication
+- **Offline-First PWA**: Field operations work offline with automatic sync
 
-## Tech Stack
+### AI Agents (9 Specialized Agents)
+1. **Procurement Agent**: Automated vendor selection, bid analysis, PO generation
+2. **Compliance Agent**: Real-time regulation monitoring, violation detection
+3. **Safety Agent**: Incident prediction, hazard analysis, protocol enforcement
+4. **Resource Agent**: Workforce optimization, equipment scheduling
+5. **Document Agent**: OCR processing, automatic categorization, routing
+6. **Decision Agent**: Risk assessment, scenario modeling, recommendations
+7. **Communication Agent**: NLP, sentiment analysis, automated notifications
+8. **Due Diligence Agent**: Vendor verification, insurance validation
+9. **Scheduling Agent**: Timeline optimization, critical path analysis
 
-### Frontend
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- Monaco Editor
-- React Router
-- Axios
-- Zustand (State Management)
+### Field Operations
+- GPS-enhanced location services
+- Camera integration for photo documentation
+- Voice-to-text for hands-free data entry
+- Offline queue with conflict resolution
+- Emergency alert system
+- Barcode/QR code scanning support
+
+### Office Dashboard
+- Predictive analytics for timeline and budget risks
+- Safety risk prediction
+- Resource bottleneck identification
+- Real-time metrics and KPIs
+- Customizable dashboards
+
+### Communication Suite
+- Real-time chat with threading
+- Project context preservation
+- Typing indicators
+- File attachments
+- Read receipts
+
+### Developer Ecosystem
+- Plugin architecture with SDK
+- Webhook system for integrations
+- Event-driven hooks
+- API documentation
+
+## 📁 Project Structure
+
+```
+project-perplexy/
+├── packages/
+│   ├── backend/          # Node.js/Express API
+│   │   ├── src/
+│   │   │   ├── services/
+│   │   │   │   └── aiAgents/  # 9 AI agents
+│   │   │   ├── routes/v1/     # Versioned API routes
+│   │   │   ├── controllers/   # Request handlers
+│   │   │   └── middleware/    # Auth, validation, RBAC
+│   │   └── prisma/            # Database schema
+│   ├── frontend/         # React 19 + TypeScript
+│   │   ├── src/
+│   │   │   ├── pages/         # 34+ page components
+│   │   │   ├── services/      # API clients
+│   │   │   ├── hooks/         # Custom React hooks
+│   │   │   └── contexts/      # Auth, state management
+│   │   └── public/
+│   │       ├── sw.js          # Service worker (PWA)
+│   │       └── manifest.json  # PWA manifest
+│   └── shared/
+│       └── sdk/               # Developer SDK
+├── docker-compose.yml    # Local development
+├── .github/workflows/    # CI/CD pipelines
+└── README.md
+```
+
+## 🛠️ Tech Stack
 
 ### Backend
-- Node.js
-- Express
-- TypeScript
-- Python Shell (for Python execution)
-- File System API
-- Multer (file uploads)
+- **Runtime**: Node.js 20
+- **Framework**: Express.js with TypeScript
+- **Database**: MongoDB with Prisma ORM
+- **Cache**: Redis
+- **Real-Time**: Socket.IO
+- **Authentication**: JWT + Passport.js (OAuth2)
+- **Validation**: Zod
+- **Testing**: Vitest
 
-## Prerequisites
+### Frontend
+- **Framework**: React 19 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **State**: Zustand
+- **Routing**: React Router DOM
+- **Charts**: Recharts
+- **Maps**: Leaflet/React-Leaflet
+- **PWA**: Service Worker + Manifest
 
-- Node.js 18+ 
-- pnpm 8+
-- Python 3 (for Python code execution)
-- Docker (optional, for containerized deployment)
+## 🚀 Quick Start
 
-## Installation
+### Prerequisites
+- Node.js 20+
+- Docker & Docker Compose
+- MongoDB (or use Docker)
+- Redis (or use Docker)
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd "project perplexy"
-   ```
+### Local Development
 
-2. **Install dependencies**
-   ```bash
-   pnpm install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
-
-4. **Create storage directory**
-   ```bash
-   mkdir -p storage
-   ```
-
-## Development
-
-1. **Start development servers**
-   ```bash
-   pnpm dev
-   ```
-
-   This will start:
-   - Frontend: http://localhost:3000
-   - Backend: http://localhost:3001
-
-2. **Or start services individually**
-   ```bash
-   pnpm dev:frontend  # Start frontend only
-   pnpm dev:backend   # Start backend only
-   ```
-
-## Building
-
-Build all packages:
+1. **Clone and install**:
 ```bash
-pnpm build
+git clone <repository-url>
+cd project-perplexy
+npm install
 ```
 
-## Docker Deployment
-
-1. **Build and start services**
-   ```bash
-   docker-compose up -d
-   ```
-
-2. **View logs**
-   ```bash
-   docker-compose logs -f
-   ```
-
-3. **Stop services**
-   ```bash
-   docker-compose down
-   ```
-
-## Project Structure
-
-```
-project perplexy/
-├── packages/
-│   ├── frontend/          # React frontend application
-│   │   ├── src/
-│   │   │   ├── components/    # React components
-│   │   │   ├── pages/         # Page components
-│   │   │   ├── services/      # API services
-│   │   │   ├── hooks/         # Custom hooks
-│   │   │   └── styles/        # CSS styles
-│   │   └── package.json
-│   ├── backend/           # Express backend API
-│   │   ├── src/
-│   │   │   ├── controllers/   # Request handlers
-│   │   │   ├── services/      # Business logic
-│   │   │   ├── routes/        # API routes
-│   │   │   ├── middleware/    # Express middleware
-│   │   │   └── utils/         # Utility functions
-│   │   └── package.json
-│   └── shared/            # Shared types and utilities
-│       ├── src/
-│       │   └── types/         # TypeScript types
-│       └── package.json
-├── docker-compose.yml     # Docker configuration
-├── package.json          # Root package.json
-└── README.md            # This file
+2. **Start services**:
+```bash
+docker-compose up -d mongodb redis
 ```
 
-## API Endpoints
-
-### Developer Sandbox & Marketplace
-- `GET /api/marketplace/apps` - List marketplace apps
-- `GET /api/marketplace/apps/:appId` - Get app details
-- `POST /api/marketplace/apps` - Publish app to marketplace
-- `POST /api/marketplace/apps/:appId/install` - Install app
-- `DELETE /api/marketplace/apps/:appId/install` - Uninstall app
-- `GET /api/marketplace/installed` - Get installed apps
-- `GET /api/marketplace/my-apps` - Get my published apps
-
-### Desktop Environment
-- `GET /api/desktop/apps` - Get installed desktop apps
-- `POST /api/desktop/apps/install` - Install app to desktop
-- `DELETE /api/desktop/apps/:appId` - Uninstall app from desktop
-- `PUT /api/desktop/apps/:appId/window` - Update window state
-- `POST /api/desktop/apps/:appId/execute` - Execute app
-- `GET /api/desktop/messages` - Get desktop messages
-- `POST /api/desktop/messages` - Send message
-- `PUT /api/desktop/messages/:messageId/read` - Mark message as read
-
-### File Management
-- `GET /api/files` - List files
-- `GET /api/files/content?path=<path>` - Get file content
-- `GET /api/files/stats` - Get file statistics
-- `POST /api/files` - Create file
-- `PUT /api/files` - Update file
-- `DELETE /api/files?path=<path>` - Delete file
-- `POST /api/files/upload` - Upload file
-
-### Code Execution
-- `POST /api/execute` - Execute code
-- `POST /api/execute/stop` - Stop execution
-- `GET /api/execution-history` - Get execution history
-- `DELETE /api/execution-history` - Clear execution history
-
-### Projects & Location
-- `GET /api/projects` - List projects
-- `POST /api/projects` - Create project
-- `GET /api/projects/:projectId` - Get project
-- `PUT /api/projects/:projectId` - Update project
-- `DELETE /api/projects/:projectId` - Delete project
-- `POST /api/location/update` - Update user location
-- `GET /api/location/active-users` - Get active users
-- `POST /api/maps/upload-drawing` - Upload PDF drawing
-- `GET /api/maps/drawing/:projectId` - Get drawing map
-
-## Environment Variables
-
-```env
-NODE_ENV=development
-PORT=3001
-DATABASE_URL=postgresql://user:password@localhost:5432/codeinterpreter
-REDIS_URL=redis://localhost:6379
-JWT_SECRET=change_this_in_production
-JWT_REFRESH_SECRET=change_this_in_production_too
-VITE_API_URL=http://localhost:3001
-VITE_WS_URL=ws://localhost:3001
-FILE_STORAGE_PATH=./storage
-MAX_FILE_SIZE=10485760
-ALLOWED_FILE_TYPES=py,js,ts,jsx,tsx,json,csv,txt,md
+3. **Setup database**:
+```bash
+cd packages/backend
+npm run prisma:generate
+npm run prisma:migrate
 ```
 
-## Scripts
+4. **Start backend**:
+```bash
+cd packages/backend
+npm run dev
+```
 
-- `pnpm dev` - Start all development servers
-- `pnpm build` - Build all packages
-- `pnpm type-check` - Type check all packages
-- `pnpm lint` - Lint all packages
-- `pnpm test:unit` - Run unit tests
-- `pnpm clean` - Clean all build artifacts
+5. **Start frontend**:
+```bash
+cd packages/frontend
+npm run dev
+```
 
-## Contributing
+6. **Access application**:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:3001
+- API Docs: http://localhost:3001/api-docs
+
+### Docker Deployment
+
+```bash
+docker-compose up -d
+```
+
+## 📚 API Documentation
+
+### Versioned API (v1)
+
+All production endpoints are under `/api/v1/`:
+
+- `/api/v1/auth/*` - Authentication
+- `/api/v1/projects/*` - Project management
+- `/api/v1/field/*` - Field operations
+- `/api/v1/documents/*` - Document management
+- `/api/v1/compliance/*` - Compliance monitoring
+- `/api/v1/safety/*` - Safety incident management
+- `/api/v1/procurement/*` - Procurement & vendors
+- `/api/v1/scheduling/*` - Schedule optimization
+- `/api/v1/analytics/*` - Analytics & reporting
+- `/api/v1/ai-agents/*` - AI agent execution
+- `/api/v1/webhooks/*` - Webhook management
+
+## 🧪 Testing
+
+```bash
+# Backend tests
+cd packages/backend
+npm test
+
+# Frontend tests
+cd packages/frontend
+npm test
+
+# Coverage
+npm run test:coverage
+```
+
+## 📦 Deployment
+
+### Production Checklist
+
+- [ ] Set environment variables
+- [ ] Configure database connection
+- [ ] Set up Redis
+- [ ] Configure JWT secrets
+- [ ] Set up OAuth2 credentials
+- [ ] Configure CORS origins
+- [ ] Set up SSL/TLS
+- [ ] Configure file storage (Google Cloud Storage)
+- [ ] Set up monitoring and logging
+- [ ] Configure backups
+
+### Environment Variables
+
+See `.env.example` files in each package for required variables.
+
+## 🔒 Security
+
+- JWT authentication with refresh tokens
+- Role-based access control (RBAC)
+- Multi-tenant data isolation
+- Input validation with Zod
+- Rate limiting
+- CORS configuration
+- Helmet.js security headers
+- SQL injection prevention (Prisma)
+- XSS protection
+
+## 📊 Statistics
+
+- **143** Backend TypeScript files
+- **88** Frontend files (TSX/TS)
+- **34** Page components
+- **25** Service modules
+- **11** API route modules
+- **9** AI agents
+- **28** Backend services
+- **20+** Database models
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Submit a pull request
+4. Add tests
+5. Submit a pull request
 
-## License
+## 📄 License
 
-MIT
+[Your License Here]
 
-## Support
+## 🆘 Support
 
 For issues and questions, please open an issue on GitHub.
 
+---
+
+Built with ❤️ for the construction industry

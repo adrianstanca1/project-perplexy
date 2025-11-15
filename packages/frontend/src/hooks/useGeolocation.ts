@@ -1,128 +1,118 @@
+/**
+ * Geolocation Hook
+ * GPS-enhanced location services for field operations
+ */
+
 import { useState, useEffect, useCallback } from 'react'
 
-export interface GeolocationState {
-  coordinates: { lat: number; lng: number } | null
-  error: string | null
-  loading: boolean
+interface Position {
+  latitude: number
+  longitude: number
+  accuracy?: number
+  altitude?: number | null
+  altitudeAccuracy?: number | null
+  heading?: number | null
+  speed?: number | null
+  timestamp: number
 }
 
-export interface GeolocationOptions {
+interface UseGeolocationOptions {
   enableHighAccuracy?: boolean
   timeout?: number
   maximumAge?: number
   watch?: boolean
-  updateInterval?: number // Update interval in milliseconds (default: 10 minutes)
 }
 
-/**
- * Hook for getting user's geolocation
- */
-export function useGeolocation(options: GeolocationOptions = {}) {
+export function useGeolocation(options: UseGeolocationOptions = {}) {
   const {
     enableHighAccuracy = true,
     timeout = 10000,
     maximumAge = 0,
     watch = false,
-    updateInterval = 10 * 60 * 1000, // 10 minutes
   } = options
 
-  const [state, setState] = useState<GeolocationState>({
-    coordinates: null,
-    error: null,
-    loading: true,
-  })
+  const [position, setPosition] = useState<Position | null>(null)
+  const [error, setError] = useState<GeolocationPositionError | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const updatePosition = useCallback((pos: GeolocationPosition) => {
+    setPosition({
+      latitude: pos.coords.latitude,
+      longitude: pos.coords.longitude,
+      accuracy: pos.coords.accuracy,
+      altitude: pos.coords.altitude,
+      altitudeAccuracy: pos.coords.altitudeAccuracy,
+      heading: pos.coords.heading,
+      speed: pos.coords.speed,
+      timestamp: pos.timestamp,
+    })
+    setError(null)
+    setIsLoading(false)
+  }, [])
+
+  const handleError = useCallback((err: GeolocationPositionError) => {
+    setError(err)
+    setIsLoading(false)
+  }, [])
 
   const getCurrentPosition = useCallback(() => {
     if (!navigator.geolocation) {
-      setState({
-        coordinates: null,
-        error: 'Geolocation is not supported by your browser',
-        loading: false,
-      })
+      setError({
+        code: 0,
+        message: 'Geolocation is not supported',
+        PERMISSION_DENIED: 1,
+        POSITION_UNAVAILABLE: 2,
+        TIMEOUT: 3,
+      } as GeolocationPositionError)
       return
     }
 
-    setState((prev) => ({ ...prev, loading: true, error: null }))
-
+    setIsLoading(true)
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setState({
-          coordinates: {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          },
-          error: null,
-          loading: false,
-        })
-      },
-      (error) => {
-        setState({
-          coordinates: null,
-          error: error.message,
-          loading: false,
-        })
-      },
+      updatePosition,
+      handleError,
       {
         enableHighAccuracy,
         timeout,
         maximumAge,
       }
     )
-  }, [enableHighAccuracy, timeout, maximumAge])
+  }, [enableHighAccuracy, timeout, maximumAge, updatePosition, handleError])
 
   useEffect(() => {
-    // Get initial position
-    getCurrentPosition()
-
-    let watchId: number | null = null
-    let intervalId: NodeJS.Timeout | null = null
-
     if (watch) {
-      // Watch position changes
-      watchId = navigator.geolocation.watchPosition(
-        (position) => {
-          setState({
-            coordinates: {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            },
-            error: null,
-            loading: false,
-          })
-        },
-        (error) => {
-          setState({
-            coordinates: null,
-            error: error.message,
-            loading: false,
-          })
-        },
+      if (!navigator.geolocation) {
+        setError({
+          code: 0,
+          message: 'Geolocation is not supported',
+          PERMISSION_DENIED: 1,
+          POSITION_UNAVAILABLE: 2,
+          TIMEOUT: 3,
+        } as GeolocationPositionError)
+        return
+      }
+
+      setIsLoading(true)
+      const watchId = navigator.geolocation.watchPosition(
+        updatePosition,
+        handleError,
         {
           enableHighAccuracy,
           timeout,
           maximumAge,
         }
       )
-    } else {
-      // Update position at intervals
-      intervalId = setInterval(() => {
-        getCurrentPosition()
-      }, updateInterval)
-    }
 
-    return () => {
-      if (watchId !== null) {
+      return () => {
         navigator.geolocation.clearWatch(watchId)
       }
-      if (intervalId !== null) {
-        clearInterval(intervalId)
-      }
     }
-  }, [watch, updateInterval, getCurrentPosition])
+  }, [watch, enableHighAccuracy, timeout, maximumAge, updatePosition, handleError])
 
   return {
-    ...state,
-    refresh: getCurrentPosition,
+    position,
+    error,
+    isLoading,
+    getCurrentPosition,
   }
 }
-

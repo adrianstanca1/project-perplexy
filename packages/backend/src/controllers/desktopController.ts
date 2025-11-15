@@ -92,7 +92,7 @@ export const desktopController = {
         subject,
         content,
       })
-      res.json({ success: true, message, message: 'Message sent successfully' })
+      res.json({ success: true, message, msg: 'Message sent successfully' })
     } catch (error) {
       next(error)
     }

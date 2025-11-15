@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Desktop, X, Minus, Square, Maximize2, Mail, Folder, Package, Code, Bell } from 'lucide-react'
+import { Monitor, X, Minus, Square, Maximize2, Mail, Folder, Package, Code, Bell } from 'lucide-react'
 import { desktopService, DesktopApp, WindowState, DesktopMessage } from '../services/desktopService'
 import { codeService } from '../services/codeService'
 import LoadingSpinner from '../components/common/LoadingSpinner'

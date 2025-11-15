@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Map, Upload, Users, RefreshCw, Layers, Maximize2, Minimize2 } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 import VirtualMapView from '../components/map/VirtualMapView'
 import RealMapView from '../components/map/RealMapView'
 import UserRoleSelector from '../components/map/UserRoleSelector'
@@ -19,19 +20,18 @@ import { projectService, Project } from '../services/projectService'
 import toast from 'react-hot-toast'
 
 type MapViewType = 'virtual' | 'real'
-type UserRole = 'manager' | 'foreman' | 'labour'
 
 export default function LiveMapPage() {
+  const { user, hasPermission } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const [mapViewType, setMapViewType] = useState<MapViewType>('virtual')
   const [drawingMap, setDrawingMap] = useState<DrawingMap | null>(null)
-  const [users, setUsers] = useState<ActiveUser[]>([])
+  const [allUsers, setAllUsers] = useState<ActiveUser[]>([])
+  const [filteredUsers, setFilteredUsers] = useState<ActiveUser[]>([])
   const [projects, setProjects] = useState<Project[]>([])
   const [selectedProjectId, setSelectedProjectId] = useState<string>(
     searchParams.get('project') || 'default-project'
   )
-  const [userRole, setUserRole] = useState<UserRole>('labour')
-  const [userName, setUserName] = useState<string>('User')
   const [isUploading, setIsUploading] = useState(false)
   const [isLoadingUsers, setIsLoadingUsers] = useState(false)
   const [selectedRegion, setSelectedRegion] = useState<string>('london')
@@ -42,13 +42,17 @@ export default function LiveMapPage() {
 
   // Get user's geolocation
   const {
-    coordinates: userCoordinates,
+    position,
     error: geolocationError,
-    loading: geolocationLoading,
+    isLoading: geolocationLoading,
   } = useGeolocation({
     enableHighAccuracy: true,
-    updateInterval: 10 * 60 * 1000, // 10 minutes
+    watch: true,
   })
+
+  const userCoordinates = position
+    ? { lat: position.latitude, lng: position.longitude }
+    : null
 
   // Default center (can be updated based on project)
   const [mapCenter, setMapCenter] = useState<Coordinates>({
@@ -77,7 +81,29 @@ export default function LiveMapPage() {
     try {
       setIsLoadingUsers(true)
       const activeUsers = await locationService.getActiveUsers(selectedProjectId)
-      setUsers(activeUsers)
+      setAllUsers(activeUsers)
+      
+      // Filter users based on role
+      let filtered = activeUsers
+      if (user?.role === 'OPERATIVE') {
+        // Operatives can only see themselves
+        filtered = activeUsers.filter((u) => u.userId === user.id)
+      } else if (user?.role === 'SUPERVISOR') {
+        // Supervisors can see team members in their projects
+        filtered = activeUsers.filter((u) => {
+          // Show users in same project or same organization
+          return u.projectId === selectedProjectId
+        })
+      } else if (user?.role === 'COMPANY_ADMIN') {
+        // Company admins can see all users in their organization
+        filtered = activeUsers.filter((u) => {
+          // Filter by organization (would need to add orgId to ActiveUser)
+          return true // For now, show all in selected project
+        })
+      }
+      // SUPER_ADMIN can see all users
+      
+      setFilteredUsers(filtered)
       setLastUpdate(new Date())
     } catch (error) {
       console.error('Failed to load active users:', error)
@@ -85,7 +111,7 @@ export default function LiveMapPage() {
     } finally {
       setIsLoadingUsers(false)
     }
-  }, [selectedProjectId])
+  }, [selectedProjectId, user])
 
   // Load drawing map
   const loadDrawingMap = useCallback(async () => {
@@ -105,24 +131,42 @@ export default function LiveMapPage() {
 
   // Update user location
   const updateUserLocation = useCallback(async (coordinates: Coordinates) => {
+    if (!user) return
     try {
-      await locationService.updateLocation(coordinates, userRole, selectedProjectId, userName)
+      // Map user role to location service role format
+      type LocationRole = 'manager' | 'foreman' | 'labour'
+      const roleMap: Record<string, LocationRole> = {
+        'SUPER_ADMIN': 'manager',
+        'COMPANY_ADMIN': 'manager',
+        'SUPERVISOR': 'foreman',
+        'OPERATIVE': 'labour',
+      }
+      const locationRole: LocationRole = roleMap[user.role] || 'labour'
+      await locationService.updateLocation(coordinates, locationRole, selectedProjectId, user.name)
       // Reload users after updating location
       loadActiveUsers()
     } catch (error) {
       console.error('Failed to update location:', error)
     }
-  }, [userRole, selectedProjectId, userName, loadActiveUsers])
+  }, [user, selectedProjectId, loadActiveUsers])
 
   // WebSocket for real-time updates
   const { isConnected: isWsConnected } = useWebSocket({
     projectId: selectedProjectId,
     onMessage: (message) => {
-      if (message.type === 'location_update') {
-        setUsers(message.users || [])
-        setLastUpdate(new Date())
-      } else if (message.type === 'active_users') {
-        setUsers(message.users || [])
+      if (message.type === 'location_update' || message.type === 'active_users') {
+        const receivedUsers = message.users || []
+        setAllUsers(receivedUsers)
+        
+        // Apply role-based filtering
+        let filtered = receivedUsers
+        if (user?.role === 'OPERATIVE') {
+          filtered = receivedUsers.filter((u: ActiveUser) => u.userId === user.id)
+        } else if (user?.role === 'SUPERVISOR') {
+          filtered = receivedUsers.filter((u: ActiveUser) => u.projectId === selectedProjectId)
+        }
+        
+        setFilteredUsers(filtered)
         setLastUpdate(new Date())
       }
     },
@@ -262,24 +306,16 @@ export default function LiveMapPage() {
     }
   }
 
-  // Load user name from localStorage
+  // Load region from localStorage
   useEffect(() => {
-    const savedName = localStorage.getItem('userName')
-    const savedRole = localStorage.getItem('userRole') as UserRole
     const savedRegion = localStorage.getItem('selectedRegion')
-    if (savedName) setUserName(savedName)
-    if (savedRole && ['manager', 'foreman', 'labour'].includes(savedRole)) {
-      setUserRole(savedRole)
-    }
     if (savedRegion) setSelectedRegion(savedRegion)
   }, [])
 
-  // Save user name, role, and region to localStorage
+  // Save region to localStorage
   useEffect(() => {
-    localStorage.setItem('userName', userName)
-    localStorage.setItem('userRole', userRole)
     localStorage.setItem('selectedRegion', selectedRegion)
-  }, [userName, userRole, selectedRegion])
+  }, [selectedRegion])
 
   // Mock weather data (would come from API in production)
   const weatherData = {
@@ -299,7 +335,7 @@ export default function LiveMapPage() {
   ]
 
   // Get current user
-  const currentUser = users.find((u) => u.userName === userName) || null
+  const currentUser = filteredUsers.find((u) => u.userId === user?.id) || null
 
   return (
     <div className={`flex flex-col h-full bg-gray-900 text-white ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
@@ -319,18 +355,20 @@ export default function LiveMapPage() {
             <UKRegionIndicator region={selectedRegion} onRegionChange={setSelectedRegion} showSelector={true} />
           </div>
           <div className="flex items-center space-x-2 flex-wrap">
-            {/* File upload */}
-            <label className="btn-secondary cursor-pointer">
-              <Upload className="w-4 h-4" />
-              <span>Upload Drawing</span>
-              <input
-                type="file"
-                accept="application/pdf"
-                onChange={handleFileUpload}
-                className="hidden"
-                disabled={isUploading}
-              />
-            </label>
+            {/* File upload - only for supervisors and above */}
+            {hasPermission('upload:drawing') && (
+              <label className="btn-secondary cursor-pointer">
+                <Upload className="w-4 h-4" />
+                <span>Upload Drawing</span>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  disabled={isUploading}
+                />
+              </label>
+            )}
             {/* Refresh users */}
             <button
               onClick={loadActiveUsers}
@@ -361,21 +399,22 @@ export default function LiveMapPage() {
               onProjectChange={setSelectedProjectId}
               onNewProject={handleNewProject}
             />
-            <UserRoleSelector
-              role={userRole}
-              onChange={setUserRole}
-              userName={userName}
-              onUserNameChange={setUserName}
-            />
+            {user && (
+              <div className="px-3 py-2 bg-gray-700 rounded-lg">
+                <span className="text-sm text-gray-300">
+                  {user.name} ({user.role.replace('_', ' ')})
+                </span>
+              </div>
+            )}
           </div>
           <div className="flex items-center space-x-4 text-sm flex-wrap">
             <LiveStatusIndicator
               isConnected={isWsConnected}
-              userCount={users.length}
+              userCount={filteredUsers.length}
               lastUpdate={lastUpdate}
             />
             {geolocationError && (
-              <div className="text-red-400 text-sm">Location Error: {geolocationError}</div>
+              <div className="text-red-400 text-sm">Location Error: {geolocationError.message}</div>
             )}
             {geolocationLoading && <div className="text-gray-400 text-sm">Getting location...</div>}
             {userCoordinates && (
@@ -394,7 +433,7 @@ export default function LiveMapPage() {
           {mapViewType === 'virtual' ? (
             <VirtualMapView
               drawingMap={drawingMap}
-              users={users}
+              users={filteredUsers}
               center={mapCenter}
               zoom={15}
             />
@@ -402,7 +441,7 @@ export default function LiveMapPage() {
             <RealMapView
               center={mapCenter}
               zoom={15}
-              users={users}
+              users={filteredUsers}
               currentUserLocation={userCoordinates || undefined}
             />
           )}
@@ -446,7 +485,10 @@ export default function LiveMapPage() {
             {/* Active Users List */}
             <div className="flex-1 overflow-y-auto p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-lg">Active Users ({users.length})</h3>
+                <h3 className="font-semibold text-lg">
+                  Active Users ({filteredUsers.length}
+                  {user?.role !== 'SUPER_ADMIN' && allUsers.length !== filteredUsers.length && ` / ${allUsers.length}`})
+                </h3>
                 <button
                   onClick={() => setShowUserList(false)}
                   className="text-gray-400 hover:text-white text-sm"
@@ -455,25 +497,30 @@ export default function LiveMapPage() {
                 </button>
               </div>
               <div className="space-y-3">
-                {currentUser && (
-                  <UserLocationCard
-                    user={currentUser}
-                    isCurrentUser={true}
-                  />
-                )}
-                {users
-                  .filter((u) => u.userName !== userName)
-                  .map((user) => (
+                {filteredUsers
+                  .filter((u) => u.userId === user?.id)
+                  .map((u) => (
                     <UserLocationCard
-                      key={user.userId}
-                      user={user}
+                      key={u.userId}
+                      user={u}
+                      isCurrentUser={true}
                     />
                   ))}
-                {users.length === 0 && (
+                {filteredUsers
+                  .filter((u) => u.userId !== user?.id)
+                  .map((u) => (
+                    <UserLocationCard
+                      key={u.userId}
+                      user={u}
+                    />
+                  ))}
+                {filteredUsers.length === 0 && (
                   <div className="text-center text-gray-400 py-8">
                     <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
                     <p>No active users</p>
-                    <p className="text-xs mt-1">Users will appear here when they join</p>
+                    {user?.role === 'OPERATIVE' && (
+                      <p className="text-xs mt-1">You can only see your own location</p>
+                    )}
                   </div>
                 )}
               </div>

@@ -1,48 +1,49 @@
-FROM node:18-alpine
+# Backend Dockerfile
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install Python for code execution
-RUN apk add --no-cache python3 py3-pip wget
+# Copy package files
+COPY package*.json ./
+COPY tsconfig.json ./
 
-# Install pnpm
-RUN npm install -g pnpm
-
-# Copy root package files (for workspace setup)
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-
-# Copy all package.json files
-COPY packages/frontend/package.json ./packages/frontend/
-COPY packages/backend/package.json ./packages/backend/
-COPY packages/shared/package.json ./packages/shared/
-
-# Install dependencies (this will install all workspace dependencies)
-RUN pnpm install --frozen-lockfile
+# Install dependencies
+RUN npm ci
 
 # Copy source code
-COPY packages/shared ./packages/shared
-COPY packages/backend ./packages/backend
+COPY . .
 
-# Create storage directories
-RUN mkdir -p packages/backend/storage/uploads packages/backend/storage/drawings packages/backend/storage/maps
+# Generate Prisma client
+RUN npx prisma generate
 
-# Build shared package first, then backend
-WORKDIR /app/packages/shared
-RUN pnpm build
+# Build TypeScript
+RUN npm run build
 
-WORKDIR /app/packages/backend
-RUN pnpm build
+# Production image
+FROM node:20-alpine
 
-# Set working directory to backend
-WORKDIR /app/packages/backend
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY prisma ./prisma
+
+# Install production dependencies only
+RUN npm ci --only=production
+
+# Copy built files
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+
+# Create uploads directory
+RUN mkdir -p uploads
 
 # Expose port
 EXPOSE 3001
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Start server
-CMD ["pnpm", "start"]
-
+CMD ["node", "dist/index.js"]

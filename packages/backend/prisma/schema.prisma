@@ -1,0 +1,1204 @@
+// ConstructAI Database Schema
+// Production-grade multi-tenant construction intelligence platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// User Model with OAuth2 support
+model User {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  email         String   @unique
+  name          String
+  password      String?  // Optional for OAuth2 users
+  avatar        String?
+  role          UserRole @default(OPERATIVE)
+  organizationId String? @db.ObjectId
+  organization  Organization? @relation(fields: [organizationId], references: [id])
+  
+  // Project scoping - users can be assigned to multiple projects
+  projectIds    String[] @default([]) // Array of project IDs user has access to
+  
+  // OAuth2
+  googleId      String?  @unique
+  oauthProvider String?  // "google", "microsoft", etc.
+  
+  // Subscription
+  subscriptionId String?
+  subscriptionStatus String? @default("free") // "free", "trial", "active", "cancelled"
+  subscriptionTier String? @default("basic") // "basic", "professional", "enterprise"
+  
+  // Email verification
+  emailVerified Boolean  @default(false)
+  emailVerificationToken String?
+  emailVerificationExpiry DateTime?
+  
+  // Password reset
+  passwordResetToken String?
+  passwordResetExpiry DateTime?
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastLoginAt   DateTime?
+  
+  // Relations
+  projects      Project[]
+  tenders       Tender[]
+  sentMessages     Message[] @relation("MessageFrom")
+  receivedMessages Message[] @relation("MessageTo")
+  teamMembers   TeamMember[]
+  createdTasks  Task[]     @relation("CreatedTasks")
+  assignedTasks Task[]     @relation("AssignedTasks")
+  fieldData     FieldData[]
+  communicationMessages CommunicationMessage[]
+  safetyIncidents SafetyIncident[]
+  analyticsDashboards AnalyticsDashboard[]
+  
+  @@index([organizationId])
+  @@index([role])
+  @@map("users")
+}
+
+enum UserRole {
+  SUPER_ADMIN      // Platform-level control
+  COMPANY_ADMIN    // Full control of their company
+  SUPERVISOR       // Field operations management
+  OPERATIVE        // On-site workers
+}
+
+// Organization Model (Multi-tenant)
+model Organization {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  slug          String   @unique
+  description   String?
+  logo          String?
+  
+  // Multi-tenant
+  tenantId      String?  @unique // Microsoft Entra ID tenant ID
+  domain        String?
+  
+  // Subscription
+  subscriptionId String?
+  subscriptionStatus String @default("trial")
+  subscriptionTier String @default("professional")
+  subscriptionExpiresAt DateTime?
+  
+  // Settings
+  settings      Json?    // Custom organization settings
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  users         User[]
+  projects      Project[]
+  tenders       Tender[]
+  suppliers     Supplier[]
+  contracts     Contract[]
+  tasks         Task[]
+  fieldData     FieldData[]
+  communicationThreads CommunicationThread[]
+  complianceRecords ComplianceRecord[]
+  documentStore DocumentStore[]
+  procurements  Procurement[]
+  safetyIncidents SafetyIncident[]
+  schedules    Schedule[]
+  reports      Report[]
+  analyticsDashboards AnalyticsDashboard[]
+  
+  @@map("organizations")
+}
+
+// Project Model
+model Project {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  description   String?
+  organizationId String  @db.ObjectId
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  userId        String   @db.ObjectId
+  user          User     @relation(fields: [userId], references: [id])
+  
+  // Project details
+  status        ProjectStatus @default(PLANNING)
+  budget        Float?
+  currency      String   @default("GBP")
+  startDate     DateTime?
+  endDate       DateTime?
+  location      String?
+  coordinates   Json?    // { lat, lng }
+  
+  // BIM
+  bimModelUrl   String?
+  ifcFileUrl    String?
+  
+  // Team
+  teamMembers   TeamMember[]
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  tenders       Tender[]
+  contracts     Contract[]
+  drawings      Drawing[]
+  tasks         Task[]
+  fieldData     FieldData[]
+  communicationThreads CommunicationThread[]
+  complianceRecords ComplianceRecord[]
+  documentStore DocumentStore[]
+  procurements  Procurement[]
+  safetyIncidents SafetyIncident[]
+  schedules    Schedule[]
+  reports      Report[]
+  
+  @@index([organizationId])
+  @@index([userId])
+  @@index([status])
+  @@map("projects")
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+// Tender Model with AI Agent processing
+model Tender {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  description   String?
+  organizationId String  @db.ObjectId
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  projectId     String?  @db.ObjectId
+  project       Project? @relation(fields: [projectId], references: [id])
+  userId        String   @db.ObjectId
+  user          User     @relation(fields: [userId], references: [id])
+  
+  // Tender details
+  client        String
+  value         Float
+  currency      String   @default("GBP")
+  deadline      DateTime
+  status        TenderStatus @default(DRAFT)
+  category      String?
+  
+  // AI Agent processing
+  aiAgentStatus Json?    // Status of each AI agent
+  aiProcessingComplete Boolean @default(false)
+  winProbability Float?  @default(0)
+  
+  // Submission
+  submissionDate DateTime?
+  assignedTo    String?
+  requirements  String[] @default([])
+  progress      Int      @default(0) // 0-100
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  bids          Bid[]
+  messages      Message[] @relation("TenderMessages")
+  
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([status])
+  @@index([deadline])
+  @@map("tenders")
+}
+
+enum TenderStatus {
+  DRAFT
+  ACTIVE
+  SUBMITTED
+  WON
+  LOST
+  CANCELLED
+}
+
+// Bid Model
+model Bid {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  tenderId      String   @db.ObjectId
+  tender        Tender   @relation(fields: [tenderId], references: [id])
+  supplierId    String   @db.ObjectId
+  supplier      Supplier @relation(fields: [supplierId], references: [id])
+  
+  // Bid details
+  amount        Float
+  currency      String   @default("GBP")
+  submittedAt   DateTime @default(now())
+  status        BidStatus @default(PENDING)
+  
+  // Evaluation
+  score         Float?
+  evaluation    Json?    // Detailed evaluation scores
+  
+  // Documents
+  documents     String[] @default([]) // URLs to bid documents
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([tenderId])
+  @@index([supplierId])
+  @@index([status])
+  @@map("bids")
+}
+
+enum BidStatus {
+  PENDING
+  EVALUATING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+// Supplier Model
+model Supplier {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  organizationId String  @db.ObjectId
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  
+  // Supplier details
+  category      String
+  rating        Float    @default(0)
+  status        SupplierStatus @default(PENDING)
+  
+  // Contact
+  contact       Json     // { email, phone, address }
+  qualifications String[] @default([])
+  
+  // Performance
+  activeContracts Int    @default(0)
+  totalValue     Float   @default(0)
+  lastActivity   DateTime @default(now())
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  bids          Bid[]
+  contracts     Contract[]
+  procurements  Procurement[]
+  
+  @@index([organizationId])
+  @@index([status])
+  @@map("suppliers")
+}
+
+enum SupplierStatus {
+  PENDING
+  ACTIVE
+  VERIFIED
+  SUSPENDED
+}
+
+// Contract Model
+model Contract {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  organizationId String  @db.ObjectId
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  projectId     String?  @db.ObjectId
+  project       Project? @relation(fields: [projectId], references: [id])
+  supplierId    String   @db.ObjectId
+  supplier      Supplier @relation(fields: [supplierId], references: [id])
+  
+  // Contract details
+  value         Float
+  currency      String   @default("GBP")
+  startDate     DateTime
+  endDate       DateTime
+  status        ContractStatus @default(PENDING)
+  type          String?  // "Supply Agreement", "Equipment Lease", etc.
+  progress      Int      @default(0) // 0-100
+  
+  // Renewal
+  renewalDate   DateTime?
+  keyTerms      String[] @default([])
+  
+  // Documents
+  documentUrl   String?
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([supplierId])
+  @@index([status])
+  @@map("contracts")
+}
+
+enum ContractStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  TERMINATED
+  RENEWED
+}
+
+// Message Model
+model Message {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  from          String   @db.ObjectId
+  fromUser      User     @relation("MessageFrom", fields: [from], references: [id])
+  to            String   @db.ObjectId
+  toUser        User     @relation("MessageTo", fields: [to], references: [id])
+  
+  // Message details
+  subject       String
+  content       String
+  read          Boolean  @default(false)
+  readAt        DateTime?
+  
+  // Relations
+  tenderId      String?  @db.ObjectId
+  tender        Tender?  @relation("TenderMessages", fields: [tenderId], references: [id])
+  contractId    String?  @db.ObjectId
+  projectId     String?  @db.ObjectId
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([from])
+  @@index([to])
+  @@index([read])
+  @@map("messages")
+}
+
+// Calendar Event Model
+model CalendarEvent {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  description   String?
+  date          DateTime
+  type          EventType
+  location      String?
+  
+  // Relations
+  tenderId      String?  @db.ObjectId
+  contractId    String?  @db.ObjectId
+  projectId     String?  @db.ObjectId
+  
+  // Attendees
+  attendees     String[] @default([]) // User IDs
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([date])
+  @@index([type])
+  @@map("calendar_events")
+}
+
+enum EventType {
+  MEETING
+  DEADLINE
+  RENEWAL
+  MILESTONE
+  OTHER
+}
+
+// Team Member Model
+model TeamMember {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @db.ObjectId
+  user          User     @relation(fields: [userId], references: [id])
+  projectId     String?  @db.ObjectId
+  project       Project? @relation(fields: [projectId], references: [id])
+  
+  // Team details
+  role          String
+  rate          Float?
+  efficiency    Float    @default(0) // 0-100
+  status        String   @default("active")
+  
+  // Contact
+  email         String?
+  phone         String?
+  skills        String[] @default([])
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([projectId])
+  @@map("team_members")
+}
+
+// Task Model (Role-based task management)
+model Task {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  description   String?
+  projectId     String   @db.ObjectId
+  project       Project  @relation(fields: [projectId], references: [id])
+  organizationId String  @db.ObjectId
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  
+  // Assignment
+  createdBy     String   @db.ObjectId
+  createdByUser User     @relation("CreatedTasks", fields: [createdBy], references: [id])
+  assignedTo    String?  @db.ObjectId // Specific user assignment
+  assignedToUser User?    @relation("AssignedTasks", fields: [assignedTo], references: [id])
+  
+  // Role-based assignment
+  assignedToRoles String[] @default([]) // ["operative", "supervisor"] - assign to all users with these roles in project
+  targetRoles     String[] @default([]) // Roles that can see this task
+  
+  // Task details
+  status        TaskStatus @default(PENDING)
+  priority      TaskPriority @default(MEDIUM)
+  dueDate       DateTime?
+  completedAt   DateTime?
+  
+  // Location
+  location      String?
+  coordinates   Json?    // { lat, lng }
+  
+  // Attachments
+  attachments   String[] @default([]) // File URLs
+  
+  // Safety & Observations
+  isSafetyIssue Boolean  @default(false)
+  safetyImages  String[] @default([])
+  observations  String?
+  incidents     Json?    // Incident reports
+  
+  // Timesheet
+  timeLogs      Json[]   @default([]) // Array of time log entries
+  approvedBy    String?  @db.ObjectId
+  approvedAt    DateTime?
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([projectId])
+  @@index([organizationId])
+  @@index([assignedTo])
+  @@index([createdBy])
+  @@index([status])
+  @@index([assignedToRoles])
+  @@map("tasks")
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  ON_HOLD
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// Drawing Model (BIM/Construction drawings)
+model Drawing {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId     String   @db.ObjectId
+  project       Project  @relation(fields: [projectId], references: [id])
+  
+  // Drawing details
+  name          String
+  description   String?
+  type          String?  // "architectural", "structural", "MEP", etc.
+  fileUrl       String
+  thumbnailUrl  String?
+  
+  // AI Processing
+  aiProcessed   Boolean  @default(false)
+  aiMetadata    Json?    // Extracted metadata from AI processing
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([projectId])
+  @@map("drawings")
+}
+
+// File Model (for Google Cloud Storage)
+model File {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  path          String
+  url           String
+  bucket        String
+  
+  // File details
+  size          Int
+  mimeType      String
+  type          String?  // "document", "image", "drawing", etc.
+  
+  // Relations
+  projectId     String?  @db.ObjectId
+  tenderId      String?  @db.ObjectId
+  contractId    String?  @db.ObjectId
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([projectId])
+  @@index([path])
+  @@map("files")
+}
+
+// Notification Model
+model Notification {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @db.ObjectId
+  
+  // Notification details
+  title         String
+  message       String
+  type          String   // "tender", "contract", "message", etc.
+  priority      String   @default("normal") // "low", "normal", "high", "urgent"
+  read          Boolean  @default(false)
+  readAt        DateTime?
+  
+  // Action
+  actionUrl     String?
+  actionLabel   String?
+  
+  // Delivery preferences
+  deliveryMethod String[] @default(["in-app"]) // "in-app", "email", "sms", "push"
+  deliveredAt   DateTime?
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  
+  @@index([userId])
+  @@index([read])
+  @@index([priority])
+  @@map("notifications")
+}
+
+// FieldData Model (Mobile field operations)
+model FieldData {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId     String   @db.ObjectId
+  project       Project  @relation(fields: [projectId], references: [id])
+  organizationId String  @db.ObjectId
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  userId        String   @db.ObjectId
+  user          User     @relation(fields: [userId], references: [id])
+  
+  // Data type
+  type          FieldDataType
+  category      String?  // "equipment", "material", "safety", "inspection", etc.
+  
+  // Content
+  title         String
+  description   String?
+  data          Json     // Flexible JSON structure for different field data types
+  
+  // Location
+  location      String?
+  coordinates   Json?    // { lat, lng }
+  
+  // Media
+  images        String[] @default([])
+  videos        String[] @default([])
+  documents     String[] @default([])
+  
+  // Equipment/Material tracking
+  equipmentId   String?
+  materialId    String?
+  barcode       String?
+  qrCode        String?
+  
+  // Safety
+  isSafetyIssue Boolean  @default(false)
+  severity      String?  // "low", "medium", "high", "critical"
+  
+  // Sync status (for offline capability)
+  syncStatus    String   @default("synced") // "pending", "syncing", "synced", "conflict"
+  lastSyncedAt  DateTime?
+  conflictData  Json?    // Conflict resolution data
+  
+  // Voice/AR data
+  voiceTranscript String?
+  arData        Json?    // Augmented reality overlay data
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  recordedAt    DateTime @default(now()) // When data was recorded in field
+  
+  @@index([projectId])
+  @@index([organizationId])
+  @@index([userId])
+  @@index([type])
+  @@index([syncStatus])
+  @@index([recordedAt])
+  @@map("field_data")
+}
+
+enum FieldDataType {
+  EQUIPMENT_STATUS
+  MATERIAL_TRACKING
+  SAFETY_INCIDENT
+  DAILY_REPORT
+  INSPECTION
+  MEASUREMENT
+  PHOTO_DOCUMENTATION
+  VOICE_NOTE
+  AR_OVERLAY
+  EMERGENCY_ALERT
+}
+
+// CommunicationThread Model
+model CommunicationThread {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId     String?  @db.ObjectId
+  project       Project? @relation(fields: [projectId], references: [id])
+  organizationId String  @db.ObjectId
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  
+  // Thread details
+  title         String
+  type          String   @default("general") // "general", "task", "safety", "procurement", etc.
+  context       Json?    // Contextual information (task ID, document ID, etc.)
+  
+  // Participants
+  participants  String[] @default([]) // User IDs
+  createdBy     String   @db.ObjectId
+  
+  // Thread metadata
+  isArchived    Boolean  @default(false)
+  priority      String   @default("normal")
+  tags          String[] @default([])
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastMessageAt DateTime?
+  
+  // Relations
+  messages      CommunicationMessage[]
+  
+  @@index([projectId])
+  @@index([organizationId])
+  @@index([createdBy])
+  @@index([isArchived])
+  @@map("communication_threads")
+}
+
+// CommunicationMessage Model
+model CommunicationMessage {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  threadId      String   @db.ObjectId
+  thread        CommunicationThread @relation(fields: [threadId], references: [id])
+  userId        String   @db.ObjectId
+  user          User     @relation(fields: [userId], references: [id])
+  
+  // Message content
+  content       String
+  type          String   @default("text") // "text", "file", "system", "decision"
+  
+  // Attachments
+  attachments   String[] @default([]) // File URLs
+  
+  // Sentiment analysis (AI processed)
+  sentiment     Json?    // { score, label, confidence }
+  
+  // Decision tracking
+  isDecision     Boolean  @default(false)
+  decisionData   Json?    // Decision log information
+  
+  // Read receipts
+  readBy        String[] @default([]) // User IDs who read the message
+  readAt        Json?    // { userId: timestamp }
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  editedAt      DateTime?
+  
+  @@index([threadId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("communication_messages")
+}
+
+// ComplianceRecord Model
+model ComplianceRecord {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  organizationId String  @db.ObjectId
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  projectId     String?  @db.ObjectId
+  project       Project? @relation(fields: [projectId], references: [id])
+  
+  // Compliance details
+  regulation    String   // Regulation name/code
+  requirement   String
+  status        ComplianceStatus @default(COMPLIANT)
+  
+  // Violation tracking
+  isViolation   Boolean  @default(false)
+  violationDate DateTime?
+  violationDetails String?
+  
+  // Remediation
+  remediationPlan String?
+  remediationStatus String? // "pending", "in-progress", "completed"
+  remediationDeadline DateTime?
+  remediationCompletedAt DateTime?
+  
+  // Audit trail
+  auditLog      Json[]   @default([]) // Array of audit entries
+  lastAuditedAt DateTime?
+  nextAuditDate DateTime?
+  
+  // AI monitoring
+  aiMonitored   Boolean  @default(true)
+  aiAlerts      Json[]   @default([]) // AI-generated alerts
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([status])
+  @@index([isViolation])
+  @@index([regulation])
+  @@map("compliance_records")
+}
+
+enum ComplianceStatus {
+  COMPLIANT
+  NON_COMPLIANT
+  PENDING_REVIEW
+  REMEDIATION_IN_PROGRESS
+  WAIVER_GRANTED
+}
+
+// DocumentStore Model (Enhanced)
+model DocumentStore {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  organizationId String  @db.ObjectId
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  projectId     String?  @db.ObjectId
+  project       Project? @relation(fields: [projectId], references: [id])
+  
+  // Document details
+  name          String
+  originalName  String
+  description   String?
+  type          String   // "drawing", "contract", "report", "photo", etc.
+  category      String?  // Auto-categorized by AI
+  
+  // File information
+  fileUrl       String
+  thumbnailUrl  String?
+  size          Int
+  mimeType      String
+  extension     String
+  
+  // Version control
+  version       Int      @default(1)
+  parentVersionId String? @db.ObjectId // Reference to parent version
+  isLatest      Boolean  @default(true)
+  
+  // OCR and AI processing
+  ocrProcessed  Boolean  @default(false)
+  ocrText       String?
+  aiMetadata    Json?    // Extracted metadata, categorization, etc.
+  aiTags        String[] @default([])
+  
+  // Access control
+  accessLevel   String   @default("organization") // "public", "organization", "project", "private"
+  allowedRoles  String[] @default([])
+  allowedUsers  String[] @default([])
+  
+  // Collaboration
+  isShared      Boolean  @default(false)
+  sharedWith    String[] @default([]) // User IDs
+  canEdit       String[] @default([]) // User IDs who can edit
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastAccessedAt DateTime?
+  
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([type])
+  @@index([category])
+  @@index([isLatest])
+  @@map("document_store")
+}
+
+// AI Agent Execution Model (Enhanced)
+model AIAgentExecution {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  agentId       String   // Identifier for the AI agent
+  agentName     String
+  agentType     AIAgentType
+  
+  // Context
+  organizationId String?  @db.ObjectId
+  projectId     String?  @db.ObjectId
+  tenderId      String?  @db.ObjectId
+  taskId        String?  @db.ObjectId
+  documentId    String?  @db.ObjectId
+  
+  // Execution details
+  status        AIAgentStatus @default(PENDING)
+  input         Json?
+  output        Json?
+  error         String?
+  errorDetails  Json?
+  
+  // Performance metrics
+  executionTime Int?     // Milliseconds
+  tokensUsed    Int?
+  cost          Float?
+  
+  // Confidence and validation
+  confidence    Float?   // 0-1
+  requiresReview Boolean @default(false)
+  reviewedBy    String?  @db.ObjectId
+  reviewedAt    DateTime?
+  
+  // Timestamps
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([agentId])
+  @@index([agentType])
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([status])
+  @@map("ai_agent_executions")
+}
+
+enum AIAgentType {
+  PROCUREMENT
+  COMPLIANCE
+  SAFETY
+  RESOURCE
+  DOCUMENT
+  DECISION
+  COMMUNICATION
+  DUE_DILIGENCE
+  SCHEDULING
+}
+
+enum AIAgentStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REQUIRES_REVIEW
+}
+
+// Procurement Model (Enhanced)
+model Procurement {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  organizationId String  @db.ObjectId
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  projectId     String?  @db.ObjectId
+  project       Project? @relation(fields: [projectId], references: [id])
+  
+  // Procurement details
+  title         String
+  description   String?
+  type          ProcurementType
+  status        ProcurementStatus @default(DRAFT)
+  
+  // Vendor information
+  vendorId      String?  @db.ObjectId
+  vendor        Supplier? @relation(fields: [vendorId], references: [id])
+  
+  // Financial
+  estimatedValue Float
+  actualValue    Float?
+  currency      String   @default("GBP")
+  
+  // AI Analysis
+  aiAnalysis    Json?    // Vendor selection analysis, bid comparison, etc.
+  aiRecommendation String?
+  aiConfidence  Float?
+  
+  // Purchase order
+  purchaseOrderNumber String?
+  purchaseOrderUrl    String?
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deadline      DateTime?
+  completedAt   DateTime?
+  
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([vendorId])
+  @@index([status])
+  @@index([type])
+  @@map("procurements")
+}
+
+enum ProcurementType {
+  MATERIALS
+  EQUIPMENT
+  SERVICES
+  LABOR
+  SUBCONTRACTOR
+}
+
+enum ProcurementStatus {
+  DRAFT
+  REQUESTED
+  QUOTED
+  APPROVED
+  ORDERED
+  DELIVERED
+  CANCELLED
+}
+
+// Safety Incident Model
+model SafetyIncident {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  organizationId String  @db.ObjectId
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  projectId     String   @db.ObjectId
+  project       Project  @relation(fields: [projectId], references: [id])
+  
+  // Incident details
+  title         String
+  description   String
+  type          SafetyIncidentType
+  severity      SafetySeverity
+  status        SafetyStatus @default(REPORTED)
+  
+  // Location
+  location      String?
+  coordinates   Json?    // { lat, lng }
+  
+  // People involved
+  reportedBy    String   @db.ObjectId
+  reportedByUser User     @relation(fields: [reportedBy], references: [id])
+  involvedPersons String[] @default([]) // User IDs
+  
+  // Media
+  images        String[] @default([])
+  videos        String[] @default([])
+  documents     String[] @default([])
+  
+  // AI Analysis
+  aiAnalysis    Json?    // Hazard analysis, prediction, recommendations
+  aiPrediction  Json?    // Risk prediction data
+  aiRecommendations String[] @default([])
+  
+  // Investigation
+  investigationNotes String?
+  rootCause      String?
+  correctiveActions String[] @default([])
+  preventiveActions String[] @default([])
+  
+  // Compliance
+  reportableTo  String[] @default([]) // Regulatory bodies
+  reportedTo    Json?    // { body: date, reference }
+  
+  // Timestamps
+  occurredAt    DateTime
+  reportedAt    DateTime @default(now())
+  investigatedAt DateTime?
+  resolvedAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([severity])
+  @@index([status])
+  @@index([occurredAt])
+  @@map("safety_incidents")
+}
+
+enum SafetyIncidentType {
+  INJURY
+  NEAR_MISS
+  PROPERTY_DAMAGE
+  ENVIRONMENTAL
+  EQUIPMENT_FAILURE
+  FIRE
+  FALL
+  STRIKE
+  OTHER
+}
+
+enum SafetySeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum SafetyStatus {
+  REPORTED
+  UNDER_INVESTIGATION
+  RESOLVED
+  CLOSED
+  ESCALATED
+}
+
+// Scheduling Model
+model Schedule {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId     String   @db.ObjectId
+  project       Project  @relation(fields: [projectId], references: [id])
+  organizationId String  @db.ObjectId
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  
+  // Schedule details
+  name          String
+  description   String?
+  baseline      Json?    // Baseline schedule data
+  current       Json?    // Current schedule data
+  
+  // Timeline
+  startDate     DateTime
+  endDate       DateTime
+  milestones    Json[]   @default([]) // Array of milestone objects
+  
+  // Critical path
+  criticalPath  Json?    // Critical path analysis
+  criticalPathUpdatedAt DateTime?
+  
+  // Resource allocation
+  resourceAllocations Json? // Resource assignments and conflicts
+  
+  // AI Optimization
+  aiOptimized   Boolean  @default(false)
+  aiRecommendations Json? // AI-generated optimization suggestions
+  optimizationHistory Json[] @default([])
+  
+  // Conflicts
+  conflicts     Json[]   @default([]) // Resource conflicts, timeline conflicts
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([projectId])
+  @@index([organizationId])
+  @@index([startDate])
+  @@index([endDate])
+  @@map("schedules")
+}
+
+// Analytics Dashboard Model
+model AnalyticsDashboard {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  organizationId String?  @db.ObjectId
+  organization  Organization? @relation(fields: [organizationId], references: [id])
+  userId        String?  @db.ObjectId
+  user          User?    @relation(fields: [userId], references: [id])
+  
+  // Dashboard details
+  name          String
+  description   String?
+  isDefault     Boolean  @default(false)
+  isPublic      Boolean  @default(false) // Shareable within organization
+  
+  // Widgets configuration
+  widgets       Json[]   @default([]) // Array of widget configurations
+  
+  // Layout
+  layout        Json?    // Dashboard layout configuration
+  
+  // Filters
+  defaultFilters Json?   // Default filter settings
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([organizationId])
+  @@index([userId])
+  @@index([isDefault])
+  @@map("analytics_dashboards")
+}
+
+// Report Model
+model Report {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  organizationId String  @db.ObjectId
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  projectId     String?  @db.ObjectId
+  project       Project? @relation(fields: [projectId], references: [id])
+  
+  // Report details
+  title         String
+  type          ReportType
+  template      String?  // Template used
+  
+  // Content
+  content       Json     // Report data and structure
+  generatedAt   DateTime @default(now())
+  
+  // Distribution
+  distributionList String[] @default([]) // User IDs or email addresses
+  distributedAt DateTime?
+  
+  // Schedule
+  isScheduled   Boolean  @default(false)
+  schedule      Json?    // Cron expression or schedule config
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([type])
+  @@index([generatedAt])
+  @@map("reports")
+}
+
+enum ReportType {
+  PROJECT_STATUS
+  FINANCIAL
+  SAFETY
+  COMPLIANCE
+  RESOURCE_UTILIZATION
+  VENDOR_PERFORMANCE
+  CUSTOM
+}
+

@@ -7,31 +7,34 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "start": "vite preview --port 3000 --host",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "type-check": "tsc --noEmit",
-    "test": "vitest",
+    "test": "vitest run --passWithNoTests",
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
+    "@auth0/auth0-react": "2.8.0",
+    "@monaco-editor/react": "^4.6.0",
+    "axios": "^1.6.2",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.303.0",
+    "monaco-editor": "^0.45.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.21.1",
-    "axios": "^1.6.2",
-    "zustand": "^4.4.7",
-    "monaco-editor": "^0.45.0",
-    "@monaco-editor/react": "^4.6.0",
-    "react-split-pane": "^0.1.92",
-    "lucide-react": "^0.303.0",
     "react-hot-toast": "^2.4.1",
-    "socket.io-client": "^4.6.1",
-    "leaflet": "^1.9.4",
-    "react-leaflet": "^4.2.1"
+    "react-leaflet": "^4.2.1",
+    "react-pdf": "10.2.0",
+    "react-router-dom": "^6.21.1",
+    "react-split-pane": "^0.1.92",
+    "recharts": "3.4.1",
+    "socket.io-client": "^4.8.1",
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@types/leaflet": "^1.9.8",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@types/react-split-pane": "^0.1.4",
-    "@types/leaflet": "^1.9.8",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react": "^4.2.1",
@@ -41,9 +44,8 @@
     "eslint-plugin-react-refresh": "^0.4.5",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.3.6",
-    "typescript": "^5.3.3",
-    "vite": "^5.0.8",
-    "vitest": "^1.0.4"
+    "typescript": "5.3.3",
+    "vite": "7.2.2",
+    "vitest": "4.0.9"
   }
 }
-
