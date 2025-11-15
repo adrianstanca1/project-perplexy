@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation } from 'react-router-dom'
+import { Outlet, Link, useLocation, Navigate } from 'react-router-dom'
 import { Folder, Play, Map, LayoutDashboard, Settings, Building2, History, Code, Package, Monitor, FileText, Truck, FileSignature, Mail, Calendar, Users, Sparkles, MessageSquare, Workflow, BarChart3, Calculator, Plug, ClipboardList, LogOut, Shield } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -20,7 +20,7 @@ export default function MainLayout() {
 
   // Redirect to login if not authenticated
   if (!user) {
-    return null // Will be handled by PrivateRoute
+    return <Navigate to="/login" state={{ from: location }} replace />
   }
 
   // Define all navigation items with permission requirements
