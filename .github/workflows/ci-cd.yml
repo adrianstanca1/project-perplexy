@@ -24,33 +24,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8
-      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install --legacy-peer-deps
       
       - name: Run backend tests
-        run: pnpm --filter backend test
+        run: npm run test --workspace=backend
         env:
           DATABASE_URL: mongodb://localhost:27017/constructai-test
       
       - name: Run frontend tests
-        run: pnpm --filter frontend test
+        run: npm run test --workspace=frontend
       
       - name: Lint all packages
-        run: pnpm lint
+        run: npm run lint
       
       - name: Type check all packages
-        run: pnpm type-check
+        run: npm run type-check
 
   build:
     needs: test
@@ -59,22 +54,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8
-      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install --legacy-peer-deps
       
       - name: Build all packages
-        run: pnpm build
+        run: npm run build
       
       - name: Docker build
         run: |

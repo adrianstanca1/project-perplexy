@@ -200,12 +200,12 @@ deploy_manual() {
     fi
     print_success "Node.js $(node -v) is installed"
     
-    # Check pnpm
-    if ! command_exists pnpm; then
-        print_warning "pnpm not found. Installing..."
-        npm install -g pnpm
+    # Check npm
+    if ! command_exists npm; then
+        print_error "npm is not installed. Please install Node.js 20+ which includes npm."
+        exit 1
     fi
-    print_success "pnpm $(pnpm -v) is installed"
+    print_success "npm $(npm -v) is installed"
     
     # Check MongoDB
     print_info "Checking MongoDB..."
@@ -229,25 +229,25 @@ deploy_manual() {
     
     # Install dependencies
     print_info "Installing dependencies..."
-    pnpm install --frozen-lockfile
+    npm install --legacy-peer-deps
     print_success "Dependencies installed"
     
     # Generate Prisma client
     print_info "Generating Prisma client..."
     cd packages/backend
-    pnpm prisma:generate
+    npm run prisma:generate
     cd ../..
     print_success "Prisma client generated"
     
     # Build application
     print_info "Building application..."
-    NODE_ENV=production pnpm build
+    NODE_ENV=production npm run build
     print_success "Build complete"
     
     # Run migrations
     print_info "Running database migrations..."
     cd packages/backend
-    pnpm prisma migrate deploy || print_warning "Migrations may have failed"
+    npx prisma migrate deploy || print_warning "Migrations may have failed"
     cd ../..
     
     # Create storage directory
@@ -264,11 +264,11 @@ deploy_manual() {
     echo "To start the application:"
     echo ""
     echo "Option 1: Start both services together"
-    echo -e "  ${GREEN}pnpm start${NC}"
+    echo -e "  ${GREEN}npm start${NC}"
     echo ""
     echo "Option 2: Start services separately"
-    echo -e "  ${GREEN}pnpm start:backend${NC}  # Terminal 1"
-    echo -e "  ${GREEN}pnpm start:frontend${NC} # Terminal 2"
+    echo -e "  ${GREEN}npm run start:backend${NC}  # Terminal 1"
+    echo -e "  ${GREEN}npm run start:frontend${NC} # Terminal 2"
     echo ""
     echo "Option 3: Use PM2 (recommended for production)"
     echo -e "  ${GREEN}npm install -g pm2${NC}"
@@ -280,7 +280,7 @@ deploy_manual() {
     read -p "Start services now? (y/n) [default: n]: " start_now
     if [ "$start_now" = "y" ] || [ "$start_now" = "Y" ]; then
         print_info "Starting services..."
-        pnpm start
+        npm start
     fi
 }
 
@@ -295,22 +295,22 @@ deploy_development() {
     fi
     print_success "Node.js $(node -v) is installed"
     
-    # Check pnpm
-    if ! command_exists pnpm; then
-        print_warning "pnpm not found. Installing..."
-        npm install -g pnpm
+    # Check npm
+    if ! command_exists npm; then
+        print_error "npm is not installed. Please install Node.js 20+ which includes npm."
+        exit 1
     fi
-    print_success "pnpm is installed"
+    print_success "npm is installed"
     
     # Install dependencies
     print_info "Installing dependencies..."
-    pnpm install --frozen-lockfile
+    npm install --legacy-peer-deps
     print_success "Dependencies installed"
     
     # Generate Prisma client
     print_info "Generating Prisma client..."
     cd packages/backend
-    pnpm prisma:generate
+    npm run prisma:generate
     cd ../..
     print_success "Prisma client generated"
     
@@ -334,7 +334,7 @@ deploy_development() {
     # Run migrations
     print_info "Running database migrations..."
     cd packages/backend
-    pnpm prisma migrate dev --name init || print_warning "Migrations may have already been applied"
+    npx prisma migrate dev --name init || print_warning "Migrations may have already been applied"
     cd ../..
     
     # Display instructions
@@ -343,25 +343,25 @@ deploy_development() {
     print_success "Setup complete!"
     echo ""
     echo "To start development servers:"
-    echo -e "  ${GREEN}pnpm dev${NC}              # Start all services"
-    echo -e "  ${GREEN}pnpm dev:frontend${NC}     # Frontend only"
-    echo -e "  ${GREEN}pnpm dev:backend${NC}      # Backend only"
+    echo -e "  ${GREEN}npm run dev${NC}              # Start all services"
+    echo -e "  ${GREEN}npm run dev:frontend${NC}     # Frontend only"
+    echo -e "  ${GREEN}npm run dev:backend${NC}      # Backend only"
     echo ""
     echo "Access Points:"
     echo -e "  Frontend:  ${BLUE}http://localhost:3000${NC}"
     echo -e "  Backend:   ${BLUE}http://localhost:3001${NC}"
     echo ""
     echo "Other Commands:"
-    echo -e "  ${GREEN}pnpm lint${NC}             # Lint code"
-    echo -e "  ${GREEN}pnpm type-check${NC}       # Type checking"
-    echo -e "  ${GREEN}pnpm test:unit${NC}        # Run tests"
+    echo -e "  ${GREEN}npm run lint${NC}             # Lint code"
+    echo -e "  ${GREEN}npm run type-check${NC}       # Type checking"
+    echo -e "  ${GREEN}npm run test:unit${NC}        # Run tests"
     echo ""
     
     # Ask if user wants to start now
     read -p "Start development servers now? (y/n) [default: n]: " start_now
     if [ "$start_now" = "y" ] || [ "$start_now" = "Y" ]; then
         print_info "Starting development servers..."
-        pnpm dev
+        npm run dev
     fi
 }
 
