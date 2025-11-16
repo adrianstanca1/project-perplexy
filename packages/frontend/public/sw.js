@@ -196,8 +196,22 @@ self.addEventListener('message', (event) => {
       event.ports[0].postMessage({ queue })
     })
   } else if (event.data.type === 'TRIGGER_SYNC') {
-    self.registration.sync.register(SYNC_TAG).then(() => {
-      event.ports[0].postMessage({ success: true })
-    })
+    if (self.registration.sync) {
+      self.registration.sync.register(SYNC_TAG).then(() => {
+        event.ports[0].postMessage({ success: true })
+      }).catch((error) => {
+        console.error('Background sync registration failed:', error)
+        event.ports[0].postMessage({ success: false, error: error.message })
+      })
+    } else {
+      syncOfflineQueue()
+        .then(() => {
+          event.ports[0].postMessage({ success: true })
+        })
+        .catch((error) => {
+          console.error('Manual sync trigger failed:', error)
+          event.ports[0].postMessage({ success: false, error: error.message })
+        })
+    }
   }
 })

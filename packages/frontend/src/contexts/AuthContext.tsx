@@ -1,9 +1,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
 import toast from 'react-hot-toast'
+import { buildApiUrl, getApiClient, setAccessToken } from '../services/apiClient'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const api = getApiClient()
 
 interface User {
   id: string
@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const userData = JSON.parse(storedUser)
         setUser(userData)
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+        setAccessToken(token)
       } catch (error) {
         console.error('Error parsing stored user:', error)
         localStorage.removeItem('accessToken')
@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post(`${API_URL}/api/auth/login`, {
+      const response = await api.post('/auth/login', {
         email,
         password,
       })
@@ -131,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('refreshToken', refreshToken)
       localStorage.setItem('user', JSON.stringify(userData))
 
-      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
+      setAccessToken(accessToken)
 
       setUser(userData)
       toast.success(`Welcome back, ${userData.name}!`)
@@ -146,14 +146,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const loginWithGoogle = () => {
-    window.location.href = `${API_URL}/api/auth/google`
+    window.location.href = buildApiUrl('/auth/google')
   }
 
   const logout = () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
     localStorage.removeItem('user')
-    delete axios.defaults.headers.common['Authorization']
+    setAccessToken(null)
     setUser(null)
     navigate('/login')
     toast.success('Logged out successfully')
@@ -166,7 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('No refresh token')
       }
 
-      const response = await axios.post(`${API_URL}/api/auth/refresh`, {
+      const response = await api.post('/auth/refresh', {
         refreshToken: storedRefreshToken,
       })
 
@@ -177,7 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('refreshToken', newRefreshToken)
       }
 
-      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
+      setAccessToken(accessToken)
     } catch (error) {
       logout()
       throw error
