@@ -117,7 +117,7 @@ check_docker_services() {
         stopped=0
         
         for service in $services; do
-            status=$(docker-compose ps -q $service | xargs docker inspect -f '{{.State.Status}}' 2>/dev/null)
+            status=$(docker-compose ps -q "$service" | xargs docker inspect -f '{{.State.Status}}' 2>/dev/null)
             if [ "$status" = "running" ]; then
                 running=$((running + 1))
                 print_pass "$service is running"
