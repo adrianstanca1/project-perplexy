@@ -221,11 +221,11 @@ docker-compose up -d
 
 **Option 3: Manual**
 ```bash
-pnpm install
-cd packages/backend && pnpm prisma:generate
+npm install
+cd packages/backend && npm run prisma:generate
 cd ../..
-pnpm build
-pnpm start
+npm run build
+npm start
 ```
 
 ### Health Check
