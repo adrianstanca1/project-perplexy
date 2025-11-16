@@ -410,7 +410,7 @@ az cosmosdb create \
   --name constructai-cosmos \
   --resource-group constructai-rg \
   --kind MongoDB \
-  --server-version 4.2
+  --server-version 6.0
 
 # Get connection string
 az cosmosdb keys list \
