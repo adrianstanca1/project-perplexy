@@ -39,7 +39,11 @@ router.post(
   authController.login
 )
 
+// NOTE: Endpoint naming inconsistency: legacy route uses '/refresh', but v1 uses '/refresh-token'.
+// Both are provided for backward compatibility, as frontend (AuthContext.tsx line 169) calls '/api/auth/refresh'.
+// See PR description for rationale.
 router.post('/refresh', authController.refreshToken)
+router.post('/refresh-token', authController.refreshToken)
 router.post('/logout', authController.logout)
 
 // OAuth routes
