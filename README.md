@@ -187,22 +187,68 @@ npm run test:coverage
 
 ## 📦 Deployment
 
+### Quick Deployment
+
+Deploy the entire platform in minutes:
+
+```bash
+# One-command deployment
+./deploy.sh
+
+# Or manually with Docker
+docker-compose up -d
+```
+
+### Deployment Guides
+
+- **[Complete Deployment Guide](./DEPLOYMENT_GUIDE.md)** - Comprehensive deployment instructions
+- **[Cloud Deployment](./CLOUD_DEPLOYMENT.md)** - Platform-specific guides (Vercel, AWS, GCP, Azure, etc.)
+- **[Local Deployment](./BUILD_AND_DEPLOY.md)** - Local development and testing
+
+### Quick Start Options
+
+**Option 1: Docker (Recommended)**
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+docker-compose up -d
+```
+
+**Option 2: One-Command Script**
+```bash
+./deploy.sh
+```
+
+**Option 3: Manual**
+```bash
+pnpm install
+cd packages/backend && pnpm prisma:generate
+cd ../..
+pnpm build
+pnpm start
+```
+
+### Health Check
+
+```bash
+./health-check.sh
+```
+
 ### Production Checklist
 
-- [ ] Set environment variables
+- [ ] Set environment variables (JWT_SECRET, passwords)
 - [ ] Configure database connection
 - [ ] Set up Redis
-- [ ] Configure JWT secrets
-- [ ] Set up OAuth2 credentials
 - [ ] Configure CORS origins
 - [ ] Set up SSL/TLS
-- [ ] Configure file storage (Google Cloud Storage)
+- [ ] Configure file storage
 - [ ] Set up monitoring and logging
 - [ ] Configure backups
+- [ ] Run security audit
 
 ### Environment Variables
 
-See `.env.example` files in each package for required variables.
+See `.env.example` for all required variables. A configured `.env` file is provided for local development.
 
 ## 🔒 Security
 
