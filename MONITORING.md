@@ -75,11 +75,11 @@ docker inspect constructai-backend | grep -A 10 Health
    ```bash
    # Backend
    cd packages/backend
-   npm install @sentry/node
+   pnpm add @sentry/node
 
    # Frontend
    cd packages/frontend
-   npm install @sentry/react
+   pnpm add @sentry/react
    ```
 
 3. **Configure Environment Variables**
@@ -137,7 +137,7 @@ docker inspect constructai-backend | grep -A 10 Health
 1. **Sign up** at https://newrelic.com
 2. **Install agent:**
    ```bash
-   npm install newrelic
+   pnpm add newrelic
    ```
 
 3. **Configure** (`newrelic.js`):
@@ -159,7 +159,7 @@ docker inspect constructai-backend | grep -A 10 Health
 
 1. **Install DD Agent:**
    ```bash
-   npm install dd-trace
+   pnpm add dd-trace
    ```
 
 2. **Initialize** (first line in `index.ts`):
@@ -275,7 +275,7 @@ output {
 2. Configure log forwarding:
    ```bash
    # In your backend
-   npm install winston-papertrail
+   pnpm add winston-papertrail
    ```
 
 3. Update Winston config:
@@ -294,7 +294,7 @@ output {
 
 ```bash
 # Install CloudWatch agent
-npm install winston-cloudwatch
+pnpm add winston-cloudwatch
 ```
 
 ```typescript
