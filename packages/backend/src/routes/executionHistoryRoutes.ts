@@ -1,12 +1,16 @@
-import express, { Router } from 'express'
-import { executionHistoryController } from '../controllers/executionHistoryController.js'
+import { Router } from 'express'
 
-const router: Router = express.Router()
+const router: Router = Router()
 
-// Routes
-router.get('/', executionHistoryController.getExecutionHistory)
-router.get('/:id', executionHistoryController.getExecutionById)
-router.delete('/', executionHistoryController.clearHistory)
+// Placeholder route - returns 501 Not Implemented
+router.get('/', (_req, res) => {
+  res.status(501).json({ error: 'Not Implemented', message: 'This route is a placeholder and will be implemented later' })
+})
+
+// Ping endpoint for smoke testing
+router.get('/_ping', (_req, res) => {
+  res.json({ message: 'placeholder', route: '/api/execution-history' })
+})
 
 export { router as executionHistoryRouter }
 

@@ -1,20 +1,16 @@
-import express, { Router } from 'express'
-import { executeController } from '../controllers/executeController.js'
-import { validateRequest } from '../middleware/validateRequest.js'
-import { z } from 'zod'
+import { Router } from 'express'
 
-const router: Router = express.Router()
+const router: Router = Router()
 
-// Execution validation schema
-const executeSchema = z.object({
-  code: z.string().min(1),
-  filePath: z.string().optional(),
-  language: z.enum(['python', 'javascript', 'typescript']).optional(),
+// Placeholder route - returns 501 Not Implemented
+router.get('/', (_req, res) => {
+  res.status(501).json({ error: 'Not Implemented', message: 'This route is a placeholder and will be implemented later' })
 })
 
-// Routes
-router.post('/', validateRequest(executeSchema), executeController.executeCode)
-router.post('/stop', executeController.stopExecution)
+// Ping endpoint for smoke testing
+router.get('/_ping', (_req, res) => {
+  res.json({ message: 'placeholder', route: '/api/execute' })
+})
 
 export { router as executeRouter }
 

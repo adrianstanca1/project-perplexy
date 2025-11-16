@@ -1,42 +1,16 @@
-import express, { Router } from 'express'
-import { contractController } from '../controllers/contractController.js'
-import { validateRequest } from '../middleware/validateRequest.js'
-import { z } from 'zod'
+import { Router } from 'express'
 
-const router: Router = express.Router()
+const router: Router = Router()
 
-// Validation schemas
-const createContractSchema = z.object({
-  title: z.string().min(1),
-  supplier: z.string().min(1),
-  value: z.number().min(0),
-  startDate: z.string().min(1),
-  endDate: z.string().min(1),
-  type: z.string().optional(),
-  renewalDate: z.string().min(1),
-  keyTerms: z.array(z.string()).optional(),
+// Placeholder route - returns 501 Not Implemented
+router.get('/', (_req, res) => {
+  res.status(501).json({ error: 'Not Implemented', message: 'This route is a placeholder and will be implemented later' })
 })
 
-const updateContractSchema = z.object({
-  title: z.string().min(1).optional(),
-  supplier: z.string().min(1).optional(),
-  value: z.number().min(0).optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  status: z.enum(['active', 'pending', 'expired', 'renewal']).optional(),
-  progress: z.number().min(0).max(100).optional(),
-  type: z.string().optional(),
-  renewalDate: z.string().optional(),
-  keyTerms: z.array(z.string()).optional(),
+// Ping endpoint for smoke testing
+router.get('/_ping', (_req, res) => {
+  res.json({ message: 'placeholder', route: '/api/contracts' })
 })
-
-// Routes
-router.get('/stats', contractController.getContractStats)
-router.get('/', contractController.getContracts)
-router.get('/:contractId', contractController.getContract)
-router.post('/', validateRequest(createContractSchema), contractController.createContract)
-router.put('/:contractId', validateRequest(updateContractSchema), contractController.updateContract)
-router.delete('/:contractId', contractController.deleteContract)
 
 export { router as contractRouter }
 
