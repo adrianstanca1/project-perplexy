@@ -9,6 +9,37 @@ This is a pnpm workspace monorepo with three main packages:
 - `packages/frontend` - React 19 + TypeScript PWA application
 - `packages/shared` - Shared types and SDK
 
+## Environment Setup
+When working on this project, follow these setup steps:
+
+1. **Install pnpm**: This project uses pnpm (v8+) for package management
+   ```bash
+   npm install -g pnpm
+   ```
+
+2. **Install dependencies**: Use pnpm to install all workspace dependencies
+   ```bash
+   pnpm install --frozen-lockfile
+   ```
+
+3. **Generate Prisma Client**: After installing dependencies, generate the Prisma client
+   ```bash
+   cd packages/backend
+   npx prisma generate
+   ```
+
+4. **Setup environment variables**: Copy `.env.example` files and configure them
+   - Backend: `packages/backend/.env`
+   - Frontend: `packages/frontend/.env`
+
+5. **Verify setup**: Run lint and type-check to ensure everything is configured correctly
+   ```bash
+   pnpm lint
+   pnpm type-check
+   ```
+
+**Note**: Always use `pnpm` commands, not `npm`. The CI/CD workflows are configured for pnpm.
+
 ## Technology Stack
 
 ### Backend
@@ -99,7 +130,7 @@ packages/frontend/src/
 ## Database & ORM
 - Use Prisma as the ORM for MongoDB
 - Schema defined in `packages/backend/prisma/schema.prisma`
-- Always run `npm run prisma:generate` after schema changes
+- Always run `pnpm prisma:generate` (from backend directory) after schema changes
 - Use transactions for multi-step operations
 - Implement proper data isolation for multi-tenancy (organizationId scoping)
 - Never expose sensitive data in API responses
@@ -230,10 +261,10 @@ pnpm type-check       # TypeScript type checking
 
 # Prisma
 cd packages/backend
-npm run prisma:generate   # Generate Prisma client
-npm run prisma:migrate    # Run migrations
-npm run prisma:studio     # Open Prisma Studio
-npm run prisma:seed       # Seed database
+pnpm prisma:generate   # Generate Prisma client
+pnpm prisma:migrate    # Run migrations
+pnpm prisma:studio     # Open Prisma Studio
+pnpm prisma:seed       # Seed database
 ```
 
 ## Additional Notes
