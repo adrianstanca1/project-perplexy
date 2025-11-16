@@ -22,21 +22,16 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install --legacy-peer-deps
 
       - name: Generate Prisma Client
         run: |
           cd packages/backend
-          pnpm prisma:generate
+          npm run prisma:generate
 
       - name: Build
-        run: pnpm build
+        run: npm run build
         env:
           NODE_ENV: production
 

@@ -15,7 +15,7 @@ export default function SearchBar({
     className = '',
 }: SearchBarProps) {
     const [query, setQuery] = useState('')
-    const debounceTimer = useRef<number | null>(null)
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
         if (debounceTimer.current) {

@@ -62,8 +62,8 @@ The repository includes a GitHub Actions workflow (`.github/workflows/vercel-dep
 3. Import your Git repository
 4. Configure the following settings:
    - **Framework Preset**: Vite
-   - **Build Command**: `pnpm --filter shared build && pnpm --filter frontend build`
-   - **Install Command**: `pnpm install --frozen-lockfile`
+   - **Build Command**: `npm run build --workspace=shared && npm run build --workspace=frontend`
+   - **Install Command**: `npm install --legacy-peer-deps`
    - **Output Directory**: `packages/frontend/dist`
 5. Click "Deploy"
 
@@ -84,8 +84,8 @@ The deployment is configured via `vercel.json` in the root directory:
 
 ```json
 {
-  "buildCommand": "pnpm --filter shared build && pnpm --filter frontend build",
-  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "npm run build --workspace=shared && npm run build --workspace=frontend",
+  "installCommand": "npm install --legacy-peer-deps",
   "outputDirectory": "packages/frontend/dist",
   "framework": "vite"
 }
@@ -139,8 +139,8 @@ Vercel automatically deploys:
 To preview the production build locally:
 
 ```bash
-pnpm --filter frontend build
-pnpm --filter frontend preview
+npm run build --workspace=frontend
+npm run preview --workspace=frontend
 ```
 
 ## Support
