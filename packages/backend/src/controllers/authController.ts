@@ -354,7 +354,8 @@ export const authController = {
   // Verify email
   async verifyEmail(req: Request, res: Response, next: NextFunction) {
     try {
-      const { token } = req.body
+      // Support both POST body and GET params for compatibility
+      const token = req.body.token || req.params.token
 
       if (!token) {
         throw new ApiError('Verification token required', 400)
