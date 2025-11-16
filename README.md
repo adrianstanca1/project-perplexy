@@ -187,22 +187,61 @@ npm run test:coverage
 
 ## 📦 Deployment
 
+### Quick Deployment
+
+For quick deployment, use the automated script:
+
+```bash
+./deploy-production.sh
+```
+
+This script will guide you through:
+- Prerequisites check
+- Environment setup
+- Building the application
+- Choosing deployment method (Docker, PM2, or standalone)
+
+### Deployment Guides
+
+- **Quick Start:** [QUICK_DEPLOY.md](./QUICK_DEPLOY.md) - Fast deployment reference
+- **Complete Guide:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) - Detailed deployment instructions
+- **CI/CD:** GitHub Actions workflow in `.github/workflows/deploy.yml`
+
+### Deployment Options
+
+1. **Docker Compose (Recommended)**
+   ```bash
+   docker-compose -f docker-compose.prod.yml up -d
+   ```
+
+2. **Vercel (Frontend)**
+   ```bash
+   cd packages/frontend
+   vercel --prod
+   ```
+
+3. **Node.js with PM2**
+   ```bash
+   pnpm build:production
+   pm2 start packages/backend/dist/index.js
+   ```
+
 ### Production Checklist
 
-- [ ] Set environment variables
-- [ ] Configure database connection
+- [ ] Set environment variables (use `.env.production.example` as template)
+- [ ] Configure database connection (MongoDB)
 - [ ] Set up Redis
-- [ ] Configure JWT secrets
-- [ ] Set up OAuth2 credentials
+- [ ] Configure JWT secrets (CHANGE defaults!)
+- [ ] Set up OAuth2 credentials (Google)
 - [ ] Configure CORS origins
 - [ ] Set up SSL/TLS
 - [ ] Configure file storage (Google Cloud Storage)
-- [ ] Set up monitoring and logging
+- [ ] Set up monitoring and logging (Sentry)
 - [ ] Configure backups
 
 ### Environment Variables
 
-See `.env.example` files in each package for required variables.
+See `.env.example` for development and `.env.production.example` for production required variables.
 
 ## 🔒 Security
 

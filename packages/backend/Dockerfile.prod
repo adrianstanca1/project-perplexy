@@ -3,32 +3,38 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@8 --activate
+
 # Copy package files
-COPY package*.json ./
+COPY package.json pnpm-lock.yaml* ./
 COPY tsconfig.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN pnpm install --frozen-lockfile --prod=false
 
 # Copy source code
 COPY . .
 
 # Build TypeScript
-RUN npm run build
+RUN pnpm build
 
 # Production stage
 FROM node:20-alpine
 
 WORKDIR /app
 
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@8 --activate
+
 # Copy built files and dependencies
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/package.json ./
 COPY --from=builder /app/prisma ./prisma
 
 # Generate Prisma client
-RUN npx prisma generate
+RUN pnpm prisma:generate
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
