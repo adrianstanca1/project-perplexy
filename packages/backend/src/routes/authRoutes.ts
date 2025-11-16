@@ -55,6 +55,13 @@ router.post('/forgot-password', authController.forgotPassword)
 router.post('/reset-password', authController.resetPassword)
 
 // Email verification
+/**
+ * Legacy email verification route.
+ * Note: This route uses POST with the token in the request body for backward compatibility.
+ * The v1 API uses GET /verify-email/:token with the token as a URL parameter.
+ * This difference is intentional and required for legacy frontend clients.
+ * See v1 auth routes for the current RESTful pattern.
+ */
 router.post('/verify-email', authController.verifyEmail)
 router.post('/resend-verification', authController.resendVerification)
 
