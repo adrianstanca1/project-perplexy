@@ -1,27 +1,16 @@
-import express, { Router } from 'express'
-import { marketplaceController } from '../controllers/marketplaceController.js'
-import { validateRequest } from '../middleware/validateRequest.js'
-import { z } from 'zod'
+import { Router } from 'express'
 
-const router: Router = express.Router()
+const router: Router = Router()
 
-// Validation schemas
-const publishAppSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().min(1),
-  code: z.string().min(1),
-  language: z.enum(['python', 'javascript', 'typescript', 'html', 'css']),
-  category: z.string().min(1),
+// Placeholder route - returns 501 Not Implemented
+router.get('/', (_req, res) => {
+  res.status(501).json({ error: 'Not Implemented', message: 'This route is a placeholder and will be implemented later' })
 })
 
-// Routes
-router.get('/apps', marketplaceController.getApps)
-router.get('/apps/:appId', marketplaceController.getApp)
-router.post('/apps', validateRequest(publishAppSchema), marketplaceController.publishApp)
-router.post('/apps/:appId/install', marketplaceController.installApp)
-router.delete('/apps/:appId/install', marketplaceController.uninstallApp)
-router.get('/installed', marketplaceController.getInstalledApps)
-router.get('/my-apps', marketplaceController.getMyApps)
+// Ping endpoint for smoke testing
+router.get('/_ping', (_req, res) => {
+  res.json({ message: 'placeholder', route: '/api/marketplace' })
+})
 
 export { router as marketplaceRouter }
 

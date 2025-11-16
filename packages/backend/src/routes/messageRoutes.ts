@@ -1,28 +1,16 @@
-import express, { Router } from 'express'
-import { messageController } from '../controllers/messageController.js'
-import { validateRequest } from '../middleware/validateRequest.js'
-import { z } from 'zod'
+import { Router } from 'express'
 
-const router: Router = express.Router()
+const router: Router = Router()
 
-// Validation schemas
-const createMessageSchema = z.object({
-  from: z.string().optional(),
-  to: z.string().min(1),
-  subject: z.string().min(1),
-  content: z.string().min(1),
-  tenderId: z.string().optional(),
-  contractId: z.string().optional(),
-  projectId: z.string().optional(),
+// Placeholder route - returns 501 Not Implemented
+router.get('/', (_req, res) => {
+  res.status(501).json({ error: 'Not Implemented', message: 'This route is a placeholder and will be implemented later' })
 })
 
-// Routes
-router.get('/stats', messageController.getMessageStats)
-router.get('/', messageController.getMessages)
-router.get('/:messageId', messageController.getMessage)
-router.post('/', validateRequest(createMessageSchema), messageController.createMessage)
-router.put('/:messageId/read', messageController.markAsRead)
-router.delete('/:messageId', messageController.deleteMessage)
+// Ping endpoint for smoke testing
+router.get('/_ping', (_req, res) => {
+  res.json({ message: 'placeholder', route: '/api/messages' })
+})
 
 export { router as messageRouter }
 

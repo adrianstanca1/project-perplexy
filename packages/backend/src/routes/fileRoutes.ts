@@ -1,32 +1,16 @@
-import express, { Router } from 'express'
-import multer from 'multer'
-import { fileController } from '../controllers/fileController.js'
-import { validateRequest } from '../middleware/validateRequest.js'
-import { z } from 'zod'
+import { Router } from 'express'
 
-const router: Router = express.Router()
-const upload = multer({ dest: './storage/uploads/' })
+const router: Router = Router()
 
-// File validation schemas
-const createFileSchema = z.object({
-  name: z.string().min(1),
-  content: z.string().optional(),
-  path: z.string().optional(),
+// Placeholder route - returns 501 Not Implemented
+router.get('/', (_req, res) => {
+  res.status(501).json({ error: 'Not Implemented', message: 'This route is a placeholder and will be implemented later' })
 })
 
-const updateFileSchema = z.object({
-  path: z.string().min(1),
-  content: z.string(),
+// Ping endpoint for smoke testing
+router.get('/_ping', (_req, res) => {
+  res.json({ message: 'placeholder', route: '/api/files' })
 })
-
-// Routes
-router.get('/', fileController.listFiles)
-router.get('/stats', fileController.getFileStats)
-router.get('/content', fileController.getFileContent)
-router.post('/', validateRequest(createFileSchema), fileController.createFile)
-router.put('/', validateRequest(updateFileSchema), fileController.updateFile)
-router.delete('/', fileController.deleteFile)
-router.post('/upload', upload.single('file'), fileController.uploadFile)
 
 export { router as fileRouter }
 

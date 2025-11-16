@@ -1,38 +1,16 @@
-import express, { Router } from 'express'
-import { aiToolsController } from '../controllers/aiToolsController.js'
-import { validateRequest } from '../middleware/validateRequest.js'
-import { z } from 'zod'
+import { Router } from 'express'
 
-const router: Router = express.Router()
+const router: Router = Router()
 
-// Validation schemas
-const createAIToolSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().min(1),
-  category: z.enum(['text', 'image', 'code', 'analysis', 'automation']),
+// Placeholder route - returns 501 Not Implemented
+router.get('/', (_req, res) => {
+  res.status(501).json({ error: 'Not Implemented', message: 'This route is a placeholder and will be implemented later' })
 })
 
-const updateAIToolSchema = z.object({
-  name: z.string().min(1).optional(),
-  description: z.string().min(1).optional(),
-  category: z.enum(['text', 'image', 'code', 'analysis', 'automation']).optional(),
-  status: z.enum(['active', 'inactive', 'pending']).optional(),
+// Ping endpoint for smoke testing
+router.get('/_ping', (_req, res) => {
+  res.json({ message: 'placeholder', route: '/api/ai-tools' })
 })
-
-const executeAIToolSchema = z.object({
-  toolId: z.string().min(1),
-  input: z.string().min(1),
-  options: z.record(z.any()).optional(),
-})
-
-// Routes
-router.get('/stats', aiToolsController.getAIToolStats)
-router.get('/', aiToolsController.getAITools)
-router.get('/:toolId', aiToolsController.getAITool)
-router.post('/', validateRequest(createAIToolSchema), aiToolsController.createAITool)
-router.put('/:toolId', validateRequest(updateAIToolSchema), aiToolsController.updateAITool)
-router.delete('/:toolId', aiToolsController.deleteAITool)
-router.post('/execute', validateRequest(executeAIToolSchema), aiToolsController.executeAITool)
 
 export { router as aiToolsRouter }
 
