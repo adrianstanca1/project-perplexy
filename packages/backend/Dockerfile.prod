@@ -1,4 +1,4 @@
-# Production Dockerfile for Backend
+# Production Dockerfile for Backend (monorepo)
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -8,7 +8,7 @@ COPY package*.json ./
 COPY tsconfig.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm install --omit=dev --legacy-peer-deps
 
 # Copy source code
 COPY . .

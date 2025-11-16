@@ -1,4 +1,4 @@
-# Backend Dockerfile
+# Backend Dockerfile for monorepo
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -7,8 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies (use install instead of ci for workspace compatibility)
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
@@ -29,7 +29,7 @@ COPY package*.json ./
 COPY prisma ./prisma
 
 # Install production dependencies only
-RUN npm ci --only=production
+RUN npm install --omit=dev --legacy-peer-deps
 
 # Copy built files
 COPY --from=builder /app/dist ./dist

@@ -1,4 +1,4 @@
-# Frontend Dockerfile
+# Frontend Dockerfile for monorepo
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -10,7 +10,7 @@ COPY tsconfig.json ./
 COPY tsconfig.node.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
@@ -21,7 +21,7 @@ RUN npm run build
 # Production image with Nginx
 FROM nginx:alpine
 
-# Copy built files (includes sw.js, manifest.json, and all other assets)
+# Copy built files (includes sw.js, manifest.json, and all other assets from Vite build)
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy nginx configuration
