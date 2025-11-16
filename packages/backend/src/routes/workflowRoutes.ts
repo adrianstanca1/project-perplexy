@@ -1,15 +1,21 @@
 import { Router } from 'express'
+import { workflowController } from '../controllers/workflowController.js'
+import { authenticate } from '../middleware/auth.js'
+import { scopeFilter } from '../middleware/rbac.js'
 
 const router: Router = Router()
 
-// Placeholder route - returns 501 Not Implemented
-router.get('/', (_req, res) => {
-  res.status(501).json({ error: 'Not Implemented', message: 'This route is a placeholder and will be implemented later' })
-})
+// All workflow routes require authentication
+router.use(authenticate)
+router.use(scopeFilter)
+
+// Workflow automation routes
+router.get('/', workflowController.getWorkflows)
+router.get('/stats', workflowController.getWorkflowStats)
 
 // Ping endpoint for smoke testing
 router.get('/_ping', (_req, res) => {
-  res.json({ message: 'placeholder', route: '/api/workflows' })
+  res.json({ message: 'workflow routes active', route: '/api/workflows' })
 })
 
 export { router as workflowRouter }

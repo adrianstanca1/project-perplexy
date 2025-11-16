@@ -1,15 +1,20 @@
 import { Router } from 'express'
+import { locationController } from '../controllers/locationController.js'
+import { authenticate } from '../middleware/auth.js'
 
 const router: Router = Router()
 
-// Placeholder route - returns 501 Not Implemented
-router.get('/', (_req, res) => {
-  res.status(501).json({ error: 'Not Implemented', message: 'This route is a placeholder and will be implemented later' })
-})
+// All location routes require authentication
+router.use(authenticate)
+
+// Location tracking routes
+router.post('/', locationController.updateLocation)
+router.get('/active', locationController.getActiveUsers)
+router.get('/user/:userId', locationController.getUserLocation)
 
 // Ping endpoint for smoke testing
 router.get('/_ping', (_req, res) => {
-  res.json({ message: 'placeholder', route: '/api/location' })
+  res.json({ message: 'location routes active', route: '/api/location' })
 })
 
 export { router as locationRouter }
