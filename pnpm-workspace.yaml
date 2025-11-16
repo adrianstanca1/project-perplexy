@@ -1,3 +1,10 @@
 packages:
-  - 'packages/*'
+  - packages/*
 
+onlyBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - browser-tabs-lock
+  - esbuild
+  - prisma
+  - sharp
