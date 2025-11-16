@@ -291,10 +291,10 @@ docker-compose -f docker-compose.prod.yml ps
 
 ```bash
 # Run Prisma migrations
-docker-compose -f docker-compose.prod.yml exec backend npm run prisma:migrate
+docker-compose -f docker-compose.prod.yml exec backend pnpm prisma:migrate
 
 # Seed database (optional)
-docker-compose -f docker-compose.prod.yml exec backend npm run prisma:seed
+docker-compose -f docker-compose.prod.yml exec backend pnpm prisma:seed
 ```
 
 #### 5. Verify Deployment
