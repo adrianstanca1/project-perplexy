@@ -1,15 +1,19 @@
 import { Router } from 'express'
+import { executeController } from '../controllers/executeController.js'
+import { authenticate } from '../middleware/auth.js'
 
 const router: Router = Router()
 
-// Placeholder route - returns 501 Not Implemented
-router.get('/', (_req, res) => {
-  res.status(501).json({ error: 'Not Implemented', message: 'This route is a placeholder and will be implemented later' })
-})
+// All execute routes require authentication
+router.use(authenticate)
+
+// Code execution routes
+router.post('/', executeController.executeCode)
+router.post('/stop', executeController.stopExecution)
 
 // Ping endpoint for smoke testing
 router.get('/_ping', (_req, res) => {
-  res.json({ message: 'placeholder', route: '/api/execute' })
+  res.json({ message: 'execute routes active', route: '/api/execute' })
 })
 
 export { router as executeRouter }

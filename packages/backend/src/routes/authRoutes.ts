@@ -1,18 +1,23 @@
 /**
  * Authentication API Routes (Legacy)
  * Provides backward compatibility with frontend
+ * Authentication API Routes (Legacy - /api/auth)
+ * Maintains backward compatibility with frontend
+ * Enhanced with validation, rate limiting, and OAuth support
  */
 
 import { Router } from 'express'
 import { authController } from '../controllers/authController.js'
 import passport from 'passport'
+import { authenticate } from '../middleware/auth.js'
+import passport from '../config/auth.js'
 import { authLimiter } from '../middleware/rateLimit.js'
 import { validateRequest } from '../middleware/validation.js'
 import { z } from 'zod'
 
 const router: Router = Router()
 
-// Public routes
+// Public routes with validation and rate limiting
 router.post(
   '/register',
   authLimiter,
@@ -45,6 +50,9 @@ router.post(
 router.post('/refresh', authController.refreshToken)
 router.post('/refresh-token', authController.refreshToken)
 router.post('/logout', authController.logout)
+// Support both /refresh and /refresh-token for compatibility
+router.post('/refresh', authController.refreshToken)
+router.post('/refresh-token', authController.refreshToken)
 
 // OAuth routes
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
@@ -68,6 +76,13 @@ router.post('/reset-password', authController.resetPassword)
  */
 router.post('/verify-email', authController.verifyEmail)
 router.post('/resend-verification', authController.resendVerification)
+// Email verification - support both POST and GET for compatibility
+router.post('/verify-email', authController.verifyEmail)
+router.get('/verify-email/:token', authController.verifyEmail)
+router.post('/resend-verification', authController.resendVerification)
+
+// Protected routes
+router.post('/logout', authenticate, authController.logout)
 
 // Ping endpoint for smoke testing
 router.get('/_ping', (_req, res) => {

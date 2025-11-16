@@ -1,15 +1,24 @@
 import { Router } from 'express'
+import { contractController } from '../controllers/contractController.js'
+import { authenticate } from '../middleware/auth.js'
+import { scopeFilter } from '../middleware/rbac.js'
 
 const router: Router = Router()
 
-// Placeholder route - returns 501 Not Implemented
-router.get('/', (_req, res) => {
-  res.status(501).json({ error: 'Not Implemented', message: 'This route is a placeholder and will be implemented later' })
-})
+// All contract routes require authentication
+router.use(authenticate)
+router.use(scopeFilter)
+
+// Contract CRUD routes
+router.get('/', contractController.getContracts)
+router.post('/', contractController.createContract)
+router.get('/:contractId', contractController.getContract)
+router.put('/:contractId', contractController.updateContract)
+router.delete('/:contractId', contractController.deleteContract)
 
 // Ping endpoint for smoke testing
 router.get('/_ping', (_req, res) => {
-  res.json({ message: 'placeholder', route: '/api/contracts' })
+  res.json({ message: 'contract routes active', route: '/api/contracts' })
 })
 
 export { router as contractRouter }
