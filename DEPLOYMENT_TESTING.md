@@ -92,10 +92,20 @@ This requires cloud platform accounts and credentials.
    - Railway auto-deploys on git push
    - Note the deployment URL (e.g., https://your-app.up.railway.app)
 
-6. **Run Migrations:**
-   - In Railway dashboard: Settings → Deploy
-   - One-time: Change start command to include migration
-   - After migration, restore original start command
+6. **Run Migrations (Safe Production Approach):**
+   - **Recommended:** Run migrations safely using Railway CLI before starting the backend:
+     ```bash
+     railway run npx prisma migrate deploy
+     ```
+   - Alternatively, configure a Railway deployment hook to run migrations automatically before each deploy:
+     - In your Railway project, go to Settings → Deployment Hooks
+     - Add a "Predeploy" hook with the command: `npx prisma migrate deploy`
+   - **Important:** Do NOT run migrations as part of the start command in production, as this can cause downtime or race conditions
+   - After migrations complete, ensure your start command is set to:
+     ```
+     cd packages/backend && npm start
+     ```
+   - See [Prisma production migration docs](https://www.prisma.io/docs/orm/prisma-migrate/workflows#production) for more details
 
 #### B. Deploy Frontend to Vercel
 
@@ -109,7 +119,8 @@ This requires cloud platform accounts and credentials.
 
 3. **Configure Build Settings:**
    - Framework Preset: Other
-   - Build Command: `cd ../.. && npm install --legacy-peer-deps && npm run build`
+   - Root Directory: Leave blank (use project root)
+   - Build Command: `npm install --legacy-peer-deps && npm run build`
    - Output Directory: `packages/frontend/dist`
    - Install Command: `npm install --legacy-peer-deps`
 

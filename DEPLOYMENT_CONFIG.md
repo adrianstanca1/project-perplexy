@@ -41,6 +41,8 @@ See individual cloud provider guides in CLOUD_DEPLOYMENT.md
 
 ### Backend Required Variables
 
+**Security Note:** Never commit credentials (such as database usernames or passwords) to version control. Always use environment-specific secret management for production deployments (e.g., Railway secrets, AWS Secrets Manager, etc.).
+
 ```env
 # Node Environment
 NODE_ENV=production
@@ -134,7 +136,8 @@ vercel --prod
 4. **Or use GitHub integration:**
    - Connect repository to Vercel
    - Set build settings:
-     - Build Command: `cd ../.. && npm install --legacy-peer-deps && npm run build`
+     - Root Directory: Leave blank (use project root)
+     - Build Command: `npm install --legacy-peer-deps && npm run build`
      - Output Directory: `packages/frontend/dist`
      - Install Command: `npm install --legacy-peer-deps`
 
@@ -162,9 +165,24 @@ vercel --prod
    - Copy variables from Backend Required Variables section above
    - Use Railway's variable references: `${{MongoDB.DATABASE_URL}}`
 
-5. **Run Migrations:**
-   - One-time: Change start command to `cd packages/backend && npx prisma migrate deploy && npm start`
-   - After migration completes, restore original start command
+5. **Run Migrations (Safe Production Approach):**
+   - Use Railway's one-time job feature or Railway CLI to run migrations before starting your backend service:
+   
+   **Option 1: Railway CLI (Recommended):**
+   ```bash
+   railway run npx prisma migrate deploy
+   ```
+   
+   **Option 2: Railway Dashboard:**
+   - In the Railway dashboard, go to your backend service
+   - Click "New" → "Job" → "One-Time Job"
+   - Set the job command to: `cd packages/backend && npx prisma migrate deploy`
+   - Run the job and verify migration success in the logs
+   - Once migrations are complete, start your backend service with the standard start command
+   
+   **Important:** Do NOT run migrations as part of the start command in production, as this can cause downtime or race conditions with multiple instances.
+   
+   See [Prisma production migration docs](https://www.prisma.io/docs/orm/prisma-migrate/workflows#production) for more details.
 
 ### Docker Deployment
 
@@ -277,7 +295,7 @@ npm run prisma:seed
 ### Backend Health Check
 ```bash
 curl https://your-backend-domain.com/health
-# Expected: {"status":"ok","timestamp":"2024-..."}
+# Expected: {"status":"ok","timestamp":"<ISO-8601-timestamp>"}
 ```
 
 ### Frontend Health Check

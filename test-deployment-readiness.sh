@@ -21,7 +21,7 @@ test_mongodb_connection() {
     
     # This would require mongosh/mongo client
     # For now, just validate URL format
-    if [[ $db_url =~ ^mongodb(:\/\/|\+srv:\/\/) ]]; then
+    if [[ $db_url =~ ^mongodb(\+srv)?:\/\/.+ ]]; then
         echo -e "${GREEN}✓ URL format valid${NC}"
         return 0
     else
@@ -53,7 +53,13 @@ echo ""
 # Check if .env exists
 if [ -f ".env" ]; then
     echo -e "${GREEN}✓ .env file found${NC}"
-    source .env
+    set -a
+    if ! source .env; then
+        echo -e "${RED}✗ Failed to source .env file. Please check for syntax errors.${NC}"
+        set +a
+        exit 1
+    fi
+    set +a
 else
     echo -e "${YELLOW}⚠ .env file not found${NC}"
     echo "  Creating from .env.example..."

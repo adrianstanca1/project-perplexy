@@ -107,7 +107,8 @@ vercel --prod
 1. Go to [vercel.com](https://vercel.com)
 2. Import Git Repository
 3. Configure:
-   - Build Command: `cd ../.. && npm install --legacy-peer-deps && npm run build`
+   - Root Directory: Leave blank (use project root)
+   - Build Command: `npm install --legacy-peer-deps && npm run build`
    - Output Directory: `packages/frontend/dist`
    - Install Command: `npm install --legacy-peer-deps`
 4. Add environment variable: `VITE_API_URL=<backend-url>`

@@ -240,8 +240,10 @@ docker compose -f docker-compose.prod.yml exec mongodb mongosh \
 
 #### Backup Database
 
+**Note:** The `mongodump` and `mongorestore` tools are part of MongoDB Database Tools, which are not included by default in the mongo:7.0 image. You'll need to either install them in the container or use a MongoDB image that includes these tools (e.g., `mongo:7.0` with Database Tools installed).
+
 ```bash
-# Create backup
+# Create backup (requires MongoDB Database Tools)
 docker compose exec mongodb mongodump \
   --db constructai \
   --out /data/backup
@@ -314,13 +316,23 @@ docker compose ps mongodb
 
 2. Test connection:
 ```bash
-docker compose exec backend node -e "
-const mongoose = require('mongoose');
+# Create a test script in the backend container
+docker compose exec backend sh -c 'cat > /tmp/test-db.js << EOF
+const mongoose = require("mongoose");
 mongoose.connect(process.env.DATABASE_URL)
-  .then(() => console.log('Connected'))
-  .catch(err => console.error(err));
-"
+  .then(() => {
+    console.log("Connected to MongoDB");
+    process.exit(0);
+  })
+  .catch(err => {
+    console.error("Connection error:", err);
+    process.exit(1);
+  });
+EOF
+node /tmp/test-db.js'
 ```
+
+> **Note:** This creates a temporary test script inside the container that uses the configured DATABASE_URL environment variable to test the MongoDB connection.
 
 ### Performance Issues
 
