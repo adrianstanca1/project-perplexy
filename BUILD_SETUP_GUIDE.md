@@ -5,25 +5,33 @@ This guide will help you build and run the complete ConstructAI platform with al
 ## Prerequisites
 
 - Node.js 18+ (preferably 20+)
-- npm 8+
+- pnpm 8+
 - MongoDB instance (local or cloud)
 - Redis instance (local or cloud)
 
 ## Quick Start
 
-### 1. Install Dependencies
+### 1. Install pnpm
+
+This project uses pnpm for package management:
 
 ```bash
-npm install
+npm install -g pnpm
+```
+
+### 2. Install Dependencies
+
+```bash
+pnpm install --frozen-lockfile
 ```
 
 This will install all dependencies for the workspace (shared, backend, and frontend packages).
 
-### 2. Generate Prisma Client
+### 3. Generate Prisma Client
 
 ```bash
 cd packages/backend
-npx prisma generate
+pnpm prisma:generate
 ```
 
 This generates the Prisma Client from your schema, which is required for the backend to work with MongoDB.
@@ -65,7 +73,7 @@ GOOGLE_CALLBACK_URL=http://localhost:3001/api/auth/google/callback
 Build all packages (shared, backend, and frontend):
 
 ```bash
-npm run build
+pnpm build
 ```
 
 This will:
@@ -80,17 +88,17 @@ This will:
 Run both frontend and backend in development mode:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Or run them separately:
 
 ```bash
 # Terminal 1 - Backend
-npm run dev:backend
+pnpm dev:backend
 
 # Terminal 2 - Frontend
-npm run dev:frontend
+pnpm dev:frontend
 ```
 
 #### Production Mode
@@ -98,17 +106,17 @@ npm run dev:frontend
 Start the built application:
 
 ```bash
-npm run start
+pnpm start
 ```
 
 Or separately:
 
 ```bash
 # Terminal 1 - Backend
-npm run start:backend
+pnpm start:backend
 
 # Terminal 2 - Frontend
-npm run start:frontend
+pnpm start:frontend
 ```
 
 ## Complete Build Pipeline
@@ -117,39 +125,39 @@ npm run start:frontend
 
 1. **Clean previous builds** (optional):
    ```bash
-   npm run clean
+   pnpm clean
    ```
 
 2. **Install dependencies**:
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. **Generate Prisma Client**:
    ```bash
    cd packages/backend
-   npx prisma generate
+   pnpm prisma generate
    cd ../..
    ```
 
 4. **Type-check all packages**:
    ```bash
-   npm run type-check
+   pnpm type-check
    ```
 
 5. **Lint all packages**:
    ```bash
-   npm run lint
+   pnpm lint
    ```
 
 6. **Build all packages**:
    ```bash
-   npm run build
+   pnpm build
    ```
 
 7. **Run tests** (optional):
    ```bash
-   npm run test:unit
+   pnpm test:unit
    ```
 
 ## Database Setup
@@ -160,7 +168,7 @@ If this is your first time setting up the database:
 
 ```bash
 cd packages/backend
-npx prisma migrate dev --name init
+pnpm prisma migrate dev --name init
 ```
 
 ### Seed Database
@@ -169,7 +177,7 @@ Populate the database with initial data:
 
 ```bash
 cd packages/backend
-npm run prisma:seed
+pnpm prismaseed
 ```
 
 ### Prisma Studio
@@ -178,7 +186,7 @@ View and edit your database with Prisma Studio:
 
 ```bash
 cd packages/backend
-npm run prisma:studio
+pnpm prismastudio
 ```
 
 This will open a web interface at `http://localhost:5555`.
@@ -187,34 +195,34 @@ This will open a web interface at `http://localhost:5555`.
 
 ### Root Level
 
-- `npm run dev` - Run frontend and backend in development mode
-- `npm run dev:frontend` - Run frontend only in development mode
-- `npm run dev:backend` - Run backend only in development mode
-- `npm run build` - Build all packages
-- `npm run build:production` - Build for production with optimizations
-- `npm run start` - Start all packages in production mode
-- `npm run start:frontend` - Start frontend in production mode
-- `npm run start:backend` - Start backend in production mode
-- `npm run type-check` - Type-check all packages
-- `npm run lint` - Lint all packages
-- `npm run test:unit` - Run unit tests for all packages
-- `npm run clean` - Clean build artifacts and node_modules
+- `pnpm dev` - Run frontend and backend in development mode
+- `pnpm dev:frontend` - Run frontend only in development mode
+- `pnpm dev:backend` - Run backend only in development mode
+- `pnpm build` - Build all packages
+- `pnpm build:production` - Build for production with optimizations
+- `pnpm start` - Start all packages in production mode
+- `pnpm start:frontend` - Start frontend in production mode
+- `pnpm start:backend` - Start backend in production mode
+- `pnpm type-check` - Type-check all packages
+- `pnpm lint` - Lint all packages
+- `pnpm test:unit` - Run unit tests for all packages
+- `pnpm clean` - Clean build artifacts and node_modules
 
 ### Backend Package
 
-- `npm run dev --workspace=backend` - Run backend with hot reload
-- `npm run build --workspace=backend` - Build backend
-- `npm run start --workspace=backend` - Start built backend
-- `npm run prisma:generate --workspace=backend` - Generate Prisma Client
-- `npm run prisma:migrate --workspace=backend` - Run database migrations
-- `npm run prisma:studio --workspace=backend` - Open Prisma Studio
-- `npm run prisma:seed --workspace=backend` - Seed database
+- `pnpm dev --filter=backend` - Run backend with hot reload
+- `pnpm build --filter=backend` - Build backend
+- `pnpm start --filter=backend` - Start built backend
+- `pnpm prismagenerate --filter=backend` - Generate Prisma Client
+- `pnpm prismamigrate --filter=backend` - Run database migrations
+- `pnpm prismastudio --filter=backend` - Open Prisma Studio
+- `pnpm prismaseed --filter=backend` - Seed database
 
 ### Frontend Package
 
-- `npm run dev --workspace=frontend` - Run frontend with hot reload
-- `npm run build --workspace=frontend` - Build frontend
-- `npm run start --workspace=frontend` - Start built frontend
+- `pnpm dev --filter=frontend` - Run frontend with hot reload
+- `pnpm build --filter=frontend` - Build frontend
+- `pnpm start --filter=frontend` - Start built frontend
 
 ## Docker Deployment
 
@@ -328,33 +336,33 @@ POST /api/v1/ai-agents/execute
 If you see TypeScript errors about missing types:
 
 ```bash
-npm install
+pnpm install
 cd packages/backend
-npx prisma generate
+pnpm prisma generate
 cd ../..
-npm run type-check
+pnpm type-check
 ```
 
 ### Build Fails
 
 1. Clean everything:
    ```bash
-   npm run clean
+   pnpm clean
    ```
 
 2. Reinstall dependencies:
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. Regenerate Prisma Client:
    ```bash
-   cd packages/backend && npx prisma generate
+   cd packages/backend && pnpm prisma generate
    ```
 
 4. Try building again:
    ```bash
-   npm run build
+   pnpm build
    ```
 
 ### Database Connection Issues
@@ -407,19 +415,19 @@ See `DEPLOYMENT_GUIDE.md` for detailed deployment instructions.
 ### Run All Tests
 
 ```bash
-npm run test:unit
+pnpm test:unit
 ```
 
 ### Run Backend Tests Only
 
 ```bash
-npm run test --workspace=backend
+pnpm test --filter=backend
 ```
 
 ### Run Frontend Tests Only
 
 ```bash
-npm run test --workspace=frontend
+pnpm test --filter=frontend
 ```
 
 ## Security Best Practices
