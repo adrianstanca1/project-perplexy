@@ -1,15 +1,24 @@
 import { Router } from 'express'
+import { supplierController } from '../controllers/supplierController.js'
+import { authenticate } from '../middleware/auth.js'
+import { scopeFilter } from '../middleware/rbac.js'
 
 const router: Router = Router()
 
-// Placeholder route - returns 501 Not Implemented
-router.get('/', (_req, res) => {
-  res.status(501).json({ error: 'Not Implemented', message: 'This route is a placeholder and will be implemented later' })
-})
+// All supplier routes require authentication
+router.use(authenticate)
+router.use(scopeFilter)
+
+// Supplier CRUD routes
+router.get('/', supplierController.getSuppliers)
+router.post('/', supplierController.createSupplier)
+router.get('/:supplierId', supplierController.getSupplier)
+router.put('/:supplierId', supplierController.updateSupplier)
+router.delete('/:supplierId', supplierController.deleteSupplier)
 
 // Ping endpoint for smoke testing
 router.get('/_ping', (_req, res) => {
-  res.json({ message: 'placeholder', route: '/api/suppliers' })
+  res.json({ message: 'supplier routes active', route: '/api/suppliers' })
 })
 
 export { router as supplierRouter }
