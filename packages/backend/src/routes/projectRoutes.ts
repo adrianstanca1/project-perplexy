@@ -1,29 +1,16 @@
-import express, { Router } from 'express'
-import { projectController } from '../controllers/projectController.js'
-import { validateRequest } from '../middleware/validateRequest.js'
-import { z } from 'zod'
+import { Router } from 'express'
 
-const router: Router = express.Router()
+const router: Router = Router()
 
-// Validation schemas
-const createProjectSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
+// Placeholder route - returns 501 Not Implemented
+router.get('/', (_req, res) => {
+  res.status(501).json({ error: 'Not Implemented', message: 'This route is a placeholder and will be implemented later' })
 })
 
-const updateProjectSchema = z.object({
-  name: z.string().min(1).optional(),
-  description: z.string().optional(),
+// Ping endpoint for smoke testing
+router.get('/_ping', (_req, res) => {
+  res.json({ message: 'placeholder', route: '/api/projects' })
 })
-
-// Routes
-router.get('/stats', projectController.getAllProjectStats)
-router.get('/', projectController.getProjects)
-router.get('/:projectId', projectController.getProject)
-router.get('/:projectId/stats', projectController.getProjectStats)
-router.post('/', validateRequest(createProjectSchema), projectController.createProject)
-router.put('/:projectId', validateRequest(updateProjectSchema), projectController.updateProject)
-router.delete('/:projectId', projectController.deleteProject)
 
 export { router as projectRouter }
 

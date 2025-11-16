@@ -1,28 +1,16 @@
-import express, { Router } from 'express'
-import multer from 'multer'
-import { mapController } from '../controllers/mapController.js'
-import { validateRequest } from '../middleware/validateRequest.js'
-import { z } from 'zod'
+import { Router } from 'express'
 
-const router: Router = express.Router()
-const upload = multer({ dest: './storage/drawings/' })
+const router: Router = Router()
 
-// Validation schemas
-const generateMapSchema = z.object({
-  center: z.object({
-    lat: z.number().min(-90).max(90),
-    lng: z.number().min(-180).max(180),
-  }),
-  zoom: z.number().min(1).max(20).optional(),
+// Placeholder route - returns 501 Not Implemented
+router.get('/', (_req, res) => {
+  res.status(501).json({ error: 'Not Implemented', message: 'This route is a placeholder and will be implemented later' })
 })
 
-// Routes
-router.post('/upload-drawing', upload.single('drawing'), mapController.uploadDrawing)
-router.get('/drawing/:projectId', mapController.getDrawingMap)
-router.get('/drawings', mapController.getAllDrawingMaps)
-router.delete('/drawing/:projectId', mapController.deleteDrawingMap)
-router.post('/generate-real-map', validateRequest(generateMapSchema), mapController.generateRealWorldMap)
-router.post('/reverse-geocode', validateRequest(generateMapSchema), mapController.reverseGeocode)
+// Ping endpoint for smoke testing
+router.get('/_ping', (_req, res) => {
+  res.json({ message: 'placeholder', route: '/api/maps' })
+})
 
 export { router as mapRouter }
 
