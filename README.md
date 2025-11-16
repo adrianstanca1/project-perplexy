@@ -187,6 +187,29 @@ npm run test:coverage
 
 ## 📦 Deployment
 
+### Full Stack Deployment (Vercel + Railway)
+
+Deploy frontend to Vercel and backend to Railway with one script:
+
+```bash
+# Interactive deployment script
+./deploy-full-stack.sh
+```
+
+Or deploy manually:
+
+```bash
+# Deploy frontend to Vercel
+cd packages/frontend
+vercel --prod
+
+# Deploy backend to Railway
+cd ../backend
+railway up
+```
+
+**Complete Guide**: See [DEPLOYMENT_VERCEL_RAILWAY.md](./DEPLOYMENT_VERCEL_RAILWAY.md) for detailed instructions.
+
 ### Quick Deployment
 
 Deploy the entire platform in minutes:
@@ -201,25 +224,31 @@ docker-compose up -d
 
 ### Deployment Guides
 
+- **[Full Stack Deployment](./DEPLOYMENT_VERCEL_RAILWAY.md)** - Deploy to Vercel + Railway (Recommended)
 - **[Complete Deployment Guide](./DEPLOYMENT_GUIDE.md)** - Comprehensive deployment instructions
 - **[Cloud Deployment](./CLOUD_DEPLOYMENT.md)** - Platform-specific guides (Vercel, AWS, GCP, Azure, etc.)
 - **[Local Deployment](./BUILD_AND_DEPLOY.md)** - Local development and testing
 
 ### Quick Start Options
 
-**Option 1: Docker (Recommended)**
+**Option 1: Full Stack Cloud Deployment (Recommended for Production)**
+```bash
+./deploy-full-stack.sh
+```
+
+**Option 2: Docker (Recommended for Development)**
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 docker-compose up -d
 ```
 
-**Option 2: One-Command Script**
+**Option 3: One-Command Script**
 ```bash
 ./deploy.sh
 ```
 
-**Option 3: Manual**
+**Option 4: Manual**
 ```bash
 npm install
 cd packages/backend && npm run prisma:generate
