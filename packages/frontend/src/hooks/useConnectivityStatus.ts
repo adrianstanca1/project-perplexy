@@ -53,4 +53,3 @@ export function useConnectivityStatus(pollIntervalMs = 15000) {
   }
 }
 
-
