@@ -29,10 +29,9 @@ export function useConnectivityStatus(pollIntervalMs = 15000) {
         setState('offline')
         setLastError(error?.message || 'Unable to contact API')
       } finally {
-        if (!isMounted) return
-        timeoutRef.current = typeof window !== 'undefined' && window.setTimeout
-          ? window.setTimeout(runCheck, pollIntervalMs)
-          : setTimeout(runCheck, pollIntervalMs)
+        if (isMounted) {
+          timeoutRef.current = setTimeout(runCheck, pollIntervalMs) as unknown as ReturnType<typeof setTimeout>
+        }
       }
     }
 

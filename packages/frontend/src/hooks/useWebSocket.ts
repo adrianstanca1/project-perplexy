@@ -9,7 +9,7 @@ const getWebSocketUrl = (): string => {
   if (wsUrl === '') {
     // Use relative URL - construct from current location at runtime
     if (typeof globalThis !== 'undefined' && 'location' in globalThis) {
-      const runtimeLocation = (globalThis as Window).location
+      const runtimeLocation = (globalThis as unknown as Window).location
       const protocol = runtimeLocation?.protocol === 'https:' ? 'wss:' : 'ws:'
       return `${protocol}//${runtimeLocation?.host ?? ''}/ws`
     }
@@ -66,7 +66,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       authToken ??
       getAuthToken?.() ??
       (typeof globalThis !== 'undefined' && 'localStorage' in globalThis
-        ? (globalThis as Window).localStorage?.getItem('accessToken')
+        ? (globalThis as unknown as Window).localStorage?.getItem('accessToken')
         : null)
     if (!token) return url
     const separator = url.includes('?') ? '&' : '?'

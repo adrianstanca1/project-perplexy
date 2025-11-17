@@ -27,7 +27,7 @@ export default function CommunicationPage() {
       const response = await communicationService.getThreads()
       const fetchedThreads = response.threads || []
       setThreads(fetchedThreads)
-      setSelectedThread((prev) => prev || fetchedThreads[0] || null)
+      setSelectedThread((prev: any) => prev || fetchedThreads[0] || null)
     } catch (error) {
       toast.error('Failed to load threads')
     }
@@ -129,18 +129,6 @@ export default function CommunicationPage() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
-
-  const loadThreads = async () => {
-    try {
-      const response = await communicationService.getThreads()
-      setThreads(response.threads || [])
-      if (!selectedThread && response.threads?.length > 0) {
-        setSelectedThread(response.threads[0])
-      }
-    } catch (error) {
-      toast.error('Failed to load threads')
-    }
-  }
 
   const loadMessages = async (threadId: string) => {
     try {

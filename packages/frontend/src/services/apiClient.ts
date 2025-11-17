@@ -40,10 +40,10 @@ apiClient.interceptors.request.use((config) => {
       config.headers.Authorization = `Bearer ${token}`
     }
   }
-  config.headers = {
-    Accept: 'application/json',
-    ...config.headers,
+  if (!config.headers) {
+    config.headers = {} as any
   }
+  config.headers.Accept = 'application/json'
   return config
 })
 
