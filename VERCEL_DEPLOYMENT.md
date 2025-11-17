@@ -62,8 +62,8 @@ The repository includes a GitHub Actions workflow (`.github/workflows/vercel-dep
 3. Import your Git repository
 4. Configure the following settings:
    - **Framework Preset**: Vite
-   - **Build Command**: `npm run build --workspace=shared && npm run build --workspace=frontend`
-   - **Install Command**: `npm install --legacy-peer-deps`
+   - **Build Command**: `cd packages/frontend && npm run build`
+   - **Install Command**: `npm install --legacy-peer-deps && cd packages/backend && npm run prisma:generate`
    - **Output Directory**: `packages/frontend/dist`
 5. Click "Deploy"
 
@@ -84,8 +84,9 @@ The deployment is configured via `vercel.json` in the root directory:
 
 ```json
 {
-  "buildCommand": "npm run build --workspace=shared && npm run build --workspace=frontend",
-  "installCommand": "npm install --legacy-peer-deps",
+  "version": 2,
+  "buildCommand": "cd packages/frontend && npm run build",
+  "installCommand": "npm install --legacy-peer-deps && cd packages/backend && npm run prisma:generate",
   "outputDirectory": "packages/frontend/dist",
   "framework": "vite"
 }

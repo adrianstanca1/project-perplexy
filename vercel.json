@@ -1,6 +1,7 @@
 {
-  "buildCommand": "npm run build --workspace=shared && npm run build --workspace=frontend",
-  "installCommand": "npm install --legacy-peer-deps",
+  "version": 2,
+  "buildCommand": "cd packages/frontend && npm run build",
+  "installCommand": "npm install --legacy-peer-deps && cd packages/backend && npm run prisma:generate",
   "outputDirectory": "packages/frontend/dist",
   "framework": "vite",
   "rewrites": [
