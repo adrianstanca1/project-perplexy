@@ -854,8 +854,8 @@ db.system.profile.find().pretty()
 | "Cannot connect to MongoDB" | MongoDB not running or wrong URL | Check `DATABASE_URL`, start MongoDB |
 | "Redis connection timeout" | Redis not running | Start Redis service |
 | "Port 3000 already in use" | Another process using port | Kill process or change port |
-| "Prisma Client not found" | Client not generated | Run `pnpm prisma generate` |
-| "Module not found" | Missing dependencies | Run `pnpm install` |
+| "Prisma Client not found" | Client not generated | Run `npm run prisma:generate` (from backend dir) |
+| "Module not found" | Missing dependencies | Run `npm install --legacy-peer-deps` |
 | "401 Unauthorized" | Invalid JWT or expired token | Check JWT_SECRET, clear cookies |
 | "CORS error" | CORS not configured | Update CORS_ORIGIN in .env |
 

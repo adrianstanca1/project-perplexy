@@ -9,9 +9,6 @@ Before you begin, ensure you have:
 - **Node.js 20+** installed ([Download here](https://nodejs.org/))
 - **Docker & Docker Compose** installed ([Get Docker](https://docs.docker.com/get-docker/))
 
-**Optional but recommended:**
-- **pnpm** installed: `npm install -g pnpm`
-
 ---
 
 ## Option 1: One-Command Deployment (Easiest) ⚡
@@ -82,11 +79,8 @@ docker compose ps
 ### Step 1: Install Dependencies
 
 ```bash
-# Install pnpm if not already installed
-npm install -g pnpm
-
 # Install project dependencies
-pnpm install --frozen-lockfile
+npm install --legacy-peer-deps
 ```
 
 ### Step 2: Setup Database
@@ -110,21 +104,21 @@ cat .env
 
 ```bash
 cd packages/backend
-pnpm prisma:generate
+npm run prisma:generate
 cd ../..
 ```
 
 ### Step 5: Build Application
 
 ```bash
-pnpm build
+npm run build
 ```
 
 ### Step 6: Run Database Migrations
 
 ```bash
 cd packages/backend
-pnpm prisma migrate deploy
+npm run prisma migrate deploy
 cd ../..
 ```
 
@@ -132,14 +126,14 @@ cd ../..
 
 ```bash
 # Start both frontend and backend
-pnpm start
+npm start
 
 # OR start separately:
 # Terminal 1:
-pnpm start:backend
+npm run start:backend
 
 # Terminal 2:
-pnpm start:frontend
+npm run start:frontend
 ```
 
 **Done!** Access the app at http://localhost:3000
@@ -152,16 +146,16 @@ For development with hot-reloading:
 
 ```bash
 # Install dependencies
-pnpm install
+npm install --legacy-peer-deps
 
 # Start MongoDB and Redis
 docker compose up -d mongodb redis
 
 # Generate Prisma client
-cd packages/backend && pnpm prisma:generate && cd ../..
+cd packages/backend && npm run prisma:generate && cd ../..
 
 # Start development servers
-pnpm dev
+npm run dev
 ```
 
 This starts:
@@ -265,40 +259,40 @@ docker compose up -d --build
 
 ```bash
 # Start all
-pnpm start
+npm start
 
 # Start individually
-pnpm start:backend
-pnpm start:frontend
+npm run start:backend
+npm run start:frontend
 
 # Build
-pnpm build
+npm run build
 
 # Test
-pnpm test:unit
+npm run test:unit
 
 # Lint
-pnpm lint
+npm run lint
 
 # Type check
-pnpm type-check
+npm run type-check
 ```
 
 ### Development
 
 ```bash
 # Start dev servers
-pnpm dev
+npm run dev
 
 # Individual dev servers
-pnpm dev:backend
-pnpm dev:frontend
+npm run dev:backend
+npm run dev:frontend
 
 # Database management
 cd packages/backend
-pnpm prisma studio        # GUI for database
-pnpm prisma migrate dev   # Create migration
-pnpm prisma db seed       # Seed data
+npm run prisma studio        # GUI for database
+npm run prisma migrate dev   # Create migration
+npm run prisma db seed       # Seed data
 ```
 
 ---
@@ -347,11 +341,11 @@ mongosh "your-connection-string"
 
 ```bash
 # Clean and rebuild
-pnpm clean
+npm run clean
 rm -rf node_modules
 rm -rf packages/*/node_modules
-pnpm install --frozen-lockfile
-pnpm build
+npm install --legacy-peer-deps
+npm run build
 ```
 
 ### Port Already in Use
@@ -408,7 +402,7 @@ Ready for production? See:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:3001
 - API Health: http://localhost:3001/health
-- Prisma Studio: `cd packages/backend && pnpm prisma studio`
+- Prisma Studio: `cd packages/backend && npm run prisma studio`
 
 ---
 
@@ -421,20 +415,20 @@ docker compose up -d                 # Start all services
 ./health-check.sh                    # Verify deployment
 
 # Development
-pnpm install                         # Install dependencies
-pnpm dev                             # Start dev servers
-pnpm build                           # Build for production
-pnpm test:unit                       # Run tests
+npm install --legacy-peer-deps       # Install dependencies
+npm run dev                          # Start dev servers
+npm run build                        # Build for production
+npm run test:unit                    # Run tests
 
 # Database
 cd packages/backend
-pnpm prisma:generate                 # Generate client
-pnpm prisma migrate deploy           # Run migrations
-pnpm prisma studio                   # Database GUI
+npm run prisma:generate              # Generate client
+npm run prisma migrate deploy        # Run migrations
+npm run prisma studio                # Database GUI
 
 # Production
-pnpm build                           # Build
-pnpm start                           # Start production
+npm run build                        # Build
+npm start                            # Start production
 pm2 start dist/index.js              # With PM2
 ```
 

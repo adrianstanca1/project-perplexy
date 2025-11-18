@@ -78,7 +78,7 @@ BACKEND_URL=https://api.example.com FRONTEND_URL=https://example.com ./health-ch
 
 **Checks**:
 - Node.js installation and version
-- pnpm installation
+- npm installation
 - Docker installation
 - Dependencies installed
 - Prisma client generated
@@ -126,7 +126,7 @@ BACKEND_URL=https://api.example.com FRONTEND_URL=https://example.com ./health-ch
 ```
 
 **Process**:
-1. Check prerequisites (Node.js, pnpm, Python)
+1. Check prerequisites (Node.js, npm, Python)
 2. Install dependencies
 3. Build application
 4. Create storage directory
@@ -213,7 +213,7 @@ All scripts require:
 
 **Manual deployment**:
 - Node.js 20+
-- pnpm 8+
+- npm 8+
 - MongoDB 7.0+
 - Redis 7+
 
@@ -362,14 +362,13 @@ sudo sh get-docker.sh
 sudo systemctl start docker
 ```
 
-### pnpm Not Found
+### npm Not Found
 
 ```bash
-# Install pnpm
-npm install -g pnpm
-
-# Verify
-pnpm --version
+# npm should come with Node.js
+# If missing, reinstall Node.js from https://nodejs.org/
+node --version
+npm --version
 ```
 
 ### Build Failures
@@ -380,7 +379,7 @@ pnpm --version
 
 # 2. Clean and retry
 rm -rf node_modules packages/*/node_modules packages/*/dist
-pnpm install --frozen-lockfile
+npm install --legacy-peer-deps
 ./build.sh
 ```
 
@@ -407,7 +406,7 @@ lsof -i :3001
 ### Development
 
 1. Use `deploy.sh` option 3 for initial setup
-2. Use `pnpm dev` for active development
+2. Use `npm run dev` for active development
 3. Run `health-check.sh` after major changes
 4. Use `validate-deployment.sh` before committing
 
