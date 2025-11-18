@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run prisma:generate --workspace=backend && npm run build",
   "installCommand": "npm install --legacy-peer-deps",
   "outputDirectory": "packages/frontend/dist",
   "framework": null,
