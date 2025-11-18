@@ -28,7 +28,7 @@ check_command() {
 # 1. Check Prerequisites
 echo "1. Checking Prerequisites..."
 check_command node || exit 1
-check_command pnpm || echo -e "${YELLOW}⚠${NC} pnpm not found - install with: npm install -g pnpm"
+check_command npm || exit 1
 check_command docker || echo -e "${YELLOW}⚠${NC} docker not found - needed for containerized deployment"
 echo ""
 
@@ -43,16 +43,16 @@ echo "3. Checking Dependencies..."
 if [ -d "node_modules" ]; then
     echo -e "${GREEN}✓${NC} Dependencies installed"
 else
-    echo -e "${YELLOW}⚠${NC} Dependencies not installed. Run: pnpm install"
+    echo -e "${YELLOW}⚠${NC} Dependencies not installed. Run: npm install --legacy-peer-deps"
 fi
 echo ""
 
 # 4. Check Prisma Client
 echo "4. Checking Prisma Client..."
-if [ -d "node_modules/.pnpm/@prisma+client"* ] || [ -d "node_modules/@prisma/client" ]; then
+if [ -d "node_modules/@prisma/client" ]; then
     echo -e "${GREEN}✓${NC} Prisma client exists"
 else
-    echo -e "${YELLOW}⚠${NC} Prisma client not generated. Run: cd packages/backend && pnpm prisma:generate"
+    echo -e "${YELLOW}⚠${NC} Prisma client not generated. Run: cd packages/backend && npm run prisma:generate"
 fi
 echo ""
 
@@ -110,10 +110,10 @@ echo "===================================="
 echo "Validation Complete!"
 echo ""
 echo "Next Steps:"
-echo "  1. If dependencies missing: pnpm install"
-echo "  2. If Prisma not generated: cd packages/backend && pnpm prisma:generate"
-echo "  3. To build: pnpm build"
+echo "  1. If dependencies missing: npm install --legacy-peer-deps"
+echo "  2. If Prisma not generated: cd packages/backend && npm run prisma:generate"
+echo "  3. To build: npm run build"
 echo "  4. To deploy with Docker: docker compose up -d"
-echo "  5. To deploy manually: pnpm start"
+echo "  5. To deploy manually: npm start"
 echo ""
-echo "For full deployment instructions, see README_DEPLOYMENT.md"
+echo "For full deployment instructions, see DEPLOYMENT_GUIDE.md"

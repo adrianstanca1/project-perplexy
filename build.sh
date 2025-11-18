@@ -8,27 +8,36 @@ echo "🚀 Building Code Interpreter Application"
 echo "========================================"
 echo ""
 
-# Check if pnpm is installed
-if ! command -v pnpm &> /dev/null; then
-    echo "❌ pnpm is not installed. Installing..."
-    npm install -g pnpm@8
+# Check if Node.js is installed
+if ! command -v node &> /dev/null; then
+    echo "❌ Node.js is not installed. Please install Node.js 20+."
+    exit 1
 fi
+
+echo "✓ Node.js $(node -v) detected"
+echo ""
 
 # Install dependencies
 echo "📦 Installing dependencies..."
-pnpm install
+npm install --legacy-peer-deps
+
+# Generate Prisma Client
+echo "🔧 Generating Prisma client..."
+cd packages/backend
+npm run prisma:generate
+cd ../..
 
 # Build all packages
 echo "🔨 Building packages..."
-pnpm build
+npm run build
 
 echo ""
 echo "✅ Build complete!"
 echo ""
 echo "To start the development server, run:"
-echo "  pnpm dev"
+echo "  npm run dev"
 echo ""
 echo "Or start services individually:"
-echo "  pnpm dev:frontend  # Frontend only"
-echo "  pnpm dev:backend   # Backend only"
+echo "  npm run dev:frontend  # Frontend only"
+echo "  npm run dev:backend   # Backend only"
 echo ""

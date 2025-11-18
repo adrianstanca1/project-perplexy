@@ -47,7 +47,7 @@ docker-compose up -d
 ### Required Software
 
 - **Node.js**: Version 20 or higher
-- **pnpm**: Version 8 or higher
+- **npm**: Version 8 or higher
 - **Docker & Docker Compose**: Latest stable version (for containerized deployment)
 
 ### Optional Requirements
@@ -61,14 +61,8 @@ docker-compose up -d
 
 ```bash
 node --version    # Should be v20.0.0+
-pnpm --version    # Should be 8.0.0+
+npm --version     # Should be 8.0.0+
 docker --version  # Latest stable
-```
-
-If pnpm is not installed:
-
-```bash
-npm install -g pnpm
 ```
 
 ---
@@ -79,11 +73,11 @@ npm install -g pnpm
 
 ```bash
 # Install all workspace dependencies
-pnpm install --frozen-lockfile
+npm install --legacy-peer-deps
 
 # Generate Prisma client
 cd packages/backend
-pnpm prisma:generate
+npm run prisma:generate
 cd ../..
 ```
 
@@ -114,11 +108,11 @@ cp .env.example .env
 
 ```bash
 # Option 1: Start all services together
-pnpm dev
+npm run dev
 
 # Option 2: Start services separately
-pnpm dev:backend   # Terminal 1
-pnpm dev:frontend  # Terminal 2
+npm run dev:backend   # Terminal 1
+npm run dev:frontend  # Terminal 2
 ```
 
 ### Access Points
@@ -163,10 +157,10 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ```bash
 # Run Prisma migrations
-docker-compose exec backend pnpm prisma migrate deploy
+docker-compose exec backend npm run prisma migrate deploy
 
 # Optional: Seed database with initial data
-docker-compose exec backend pnpm prisma db seed
+docker-compose exec backend npm run prisma db seed
 ```
 
 #### Step 4: Verify Deployment
@@ -214,14 +208,14 @@ docker-compose up -d
 #### Step 1: Install Dependencies
 
 ```bash
-pnpm install --frozen-lockfile
+npm install --legacy-peer-deps
 ```
 
 #### Step 2: Generate Prisma Client
 
 ```bash
 cd packages/backend
-pnpm prisma:generate
+npm run prisma:generate
 cd ../..
 ```
 
@@ -229,7 +223,7 @@ cd ../..
 
 ```bash
 # Build with production optimizations
-NODE_ENV=production pnpm build
+NODE_ENV=production npm run build
 ```
 
 #### Step 4: Configure Environment
@@ -254,7 +248,7 @@ Follow platform-specific guides:
 
 ```bash
 cd packages/backend
-pnpm prisma migrate deploy
+npm run prisma migrate deploy
 cd ../..
 ```
 
@@ -404,8 +398,8 @@ railway up
    - **Redis** instance
 
 3. Configure build commands:
-   - Backend: `pnpm install && pnpm build`
-   - Frontend: `pnpm install && pnpm build`
+   - Backend: `npm install --legacy-peer-deps && npm run build`
+   - Frontend: `npm install --legacy-peer-deps && npm run build`
 
 4. Set environment variables in Render dashboard
 
@@ -565,16 +559,16 @@ db.createUser({
 ```bash
 # Development: Create and apply migrations
 cd packages/backend
-pnpm prisma migrate dev
+npm run prisma migrate dev
 
 # Production: Apply existing migrations
-pnpm prisma migrate deploy
+npm run prisma migrate deploy
 
 # Generate Prisma Client
-pnpm prisma generate
+npm run prisma generate
 
 # View database in Prisma Studio
-pnpm prisma studio
+npm run prisma studio
 ```
 
 ### Redis
@@ -692,13 +686,13 @@ docker stats
 
 ```bash
 # Check for vulnerabilities
-pnpm audit
+npm audit
 
 # Fix vulnerabilities
-pnpm audit --fix
+npm audit fix
 
 # Update dependencies
-pnpm update --latest
+npm update --save
 ```
 
 ### SSL/TLS Setup
@@ -737,22 +731,22 @@ sudo ufw enable
 
 ```bash
 cd packages/backend
-pnpm prisma generate
+npm run prisma:generate
 ```
 
 **TypeScript errors:**
 
 ```bash
 # Clean and rebuild
-pnpm clean
-pnpm install
-pnpm build
+npm run clean
+npm install --legacy-peer-deps
+npm run build
 ```
 
 **Missing dependencies:**
 
 ```bash
-pnpm install --frozen-lockfile
+npm install --legacy-peer-deps
 ```
 
 ### Runtime Errors
@@ -966,12 +960,12 @@ aws s3 sync ./uploads s3://your-bucket/backups/uploads/
 
 ```bash
 # Development
-pnpm dev                 # Start dev servers
-pnpm build               # Build for production
-pnpm start               # Start production servers
-pnpm test:unit           # Run tests
-pnpm lint                # Lint code
-pnpm type-check          # Type checking
+npm run dev                 # Start dev servers
+npm run build               # Build for production
+npm start                   # Start production servers
+npm run test:unit           # Run tests
+npm run lint                # Lint code
+npm run type-check          # Type checking
 
 # Docker
 docker-compose up -d                      # Start all services
@@ -981,10 +975,10 @@ docker-compose exec backend sh            # Backend shell
 docker-compose restart backend            # Restart service
 
 # Database
-pnpm prisma generate                      # Generate Prisma client
-pnpm prisma migrate dev                   # Create migration
-pnpm prisma migrate deploy                # Apply migrations
-pnpm prisma studio                        # Database GUI
+npm run prisma:generate                   # Generate Prisma client (from backend dir)
+npm run prisma migrate dev                # Create migration (from backend dir)
+npm run prisma migrate deploy             # Apply migrations (from backend dir)
+npm run prisma studio                     # Database GUI (from backend dir)
 
 # Process Management (PM2)
 pm2 start dist/index.js                   # Start app
