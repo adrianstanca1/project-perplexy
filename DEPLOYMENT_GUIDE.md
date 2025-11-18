@@ -976,9 +976,9 @@ docker-compose restart backend            # Restart service
 
 # Database
 npm run prisma:generate                   # Generate Prisma client (from backend dir)
-npm run prisma migrate dev                # Create migration (from backend dir)
-npm run prisma migrate deploy             # Apply migrations (from backend dir)
-npm run prisma studio                     # Database GUI (from backend dir)
+npm run prisma:migrate                    # Create migration (from backend dir)
+npx prisma migrate deploy                 # Apply migrations (from backend dir)
+npm run prisma:studio                     # Database GUI (from backend dir)
 
 # Process Management (PM2)
 pm2 start dist/index.js                   # Start app
