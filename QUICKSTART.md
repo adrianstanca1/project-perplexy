@@ -290,7 +290,7 @@ npm run dev:frontend
 
 # Database management
 cd packages/backend
-npm run prisma studio        # GUI for database
+npm run prisma:studio        # GUI for database
 npm run prisma migrate dev   # Create migration
 npm run prisma db seed       # Seed data
 ```
