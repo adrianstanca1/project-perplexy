@@ -292,7 +292,7 @@ npm run dev:frontend
 cd packages/backend
 npm run prisma:studio        # GUI for database
 npm run prisma:migrate       # Create migration
-npm run prisma db seed       # Seed data
+npm run prisma:seed          # Seed data
 ```
 
 ---
