@@ -568,7 +568,7 @@ npx prisma migrate deploy
 npm run prisma:generate
 
 # View database in Prisma Studio
-npm run prisma studio
+npm run prisma:studio
 ```
 
 ### Redis
