@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import logger from './logger.js'
 
 // Prisma Client instance with connection pooling
 export const prisma = new PrismaClient({
@@ -8,7 +9,7 @@ export const prisma = new PrismaClient({
 
 // Connection handling
 prisma.$connect().catch((error: unknown) => {
-  console.error('Failed to connect to database:', error)
+  logger.error('Failed to connect to database', { error: error instanceof Error ? error.message : String(error) })
   process.exit(1)
 })
 
