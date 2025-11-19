@@ -118,7 +118,7 @@ npm run build
 
 ```bash
 cd packages/backend
-npm run prisma migrate deploy
+npx prisma migrate deploy
 cd ../..
 ```
 
