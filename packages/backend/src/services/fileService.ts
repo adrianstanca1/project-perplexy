@@ -2,6 +2,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { ApiError } from '../utils/ApiError.js'
+import logger from '../config/logger.js'
 
 const STORAGE_PATH = process.env.FILE_STORAGE_PATH || './storage'
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '10485760') // 10MB
@@ -227,7 +228,7 @@ export const fileService = {
         }
       } catch (error: any) {
         if (error.code !== 'ENOENT') {
-          console.error('Error counting files:', error)
+          logger.error('Error counting files:', { error: error.message, code: error.code })
         }
       }
     }

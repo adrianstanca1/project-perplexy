@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { ApiError } from '../utils/ApiError.js'
+import logger from '../config/logger.js'
 
 export function errorHandler(
   err: Error | ApiError,
@@ -16,7 +17,7 @@ export function errorHandler(
   }
 
   // Default error
-  console.error('Unhandled error:', err)
+  logger.error('Unhandled error:', { error: err.message, stack: err.stack })
   return res.status(500).json({
     status: 'error',
     message: 'Internal server error',

@@ -1,6 +1,7 @@
 import fetch from 'node-fetch'
 import { Coordinates, MapView } from '../types/location.js'
 import { ApiError } from '../utils/ApiError.js'
+import logger from '../config/logger.js'
 
 /**
  * Service for generating real-world map views based on GPS coordinates
@@ -98,7 +99,7 @@ export const mapService = {
       const data = await response.json() as any
       return data.display_name || 'Unknown location'
     } catch (error) {
-      console.error('Reverse geocoding error:', error)
+      logger.error('Reverse geocoding error', { error: error instanceof Error ? error.message : String(error) })
       return 'Unknown location'
     }
   },

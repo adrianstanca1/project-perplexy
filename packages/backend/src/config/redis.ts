@@ -1,4 +1,5 @@
 import Redis from 'ioredis'
+import logger from './logger.js'
 
 // Redis client configuration
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
@@ -10,11 +11,11 @@ const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
 })
 
 redis.on('connect', () => {
-  console.log('✅ Redis connected')
+  logger.info('✅ Redis connected')
 })
 
 redis.on('error', (error) => {
-  console.error('❌ Redis error:', error)
+  logger.error('❌ Redis error', { error: error.message })
 })
 
 // Cache helper functions
@@ -24,7 +25,7 @@ export const cache = {
     try {
       return await redis.get(key)
     } catch (error) {
-      console.error('Redis get error:', error)
+      logger.error('Redis get error', { error: error instanceof Error ? error.message : String(error), key })
       return null
     }
   },
@@ -38,7 +39,7 @@ export const cache = {
         await redis.set(key, value)
       }
     } catch (error) {
-      console.error('Redis set error:', error)
+      logger.error('Redis set error', { error: error instanceof Error ? error.message : String(error), key })
     }
   },
 
@@ -47,7 +48,7 @@ export const cache = {
     try {
       await redis.del(key)
     } catch (error) {
-      console.error('Redis del error:', error)
+      logger.error('Redis del error', { error: error instanceof Error ? error.message : String(error), key })
     }
   },
 
@@ -57,7 +58,7 @@ export const cache = {
       const result = await redis.exists(key)
       return result === 1
     } catch (error) {
-      console.error('Redis exists error:', error)
+      logger.error('Redis exists error', { error: error instanceof Error ? error.message : String(error), key })
       return false
     }
   },
@@ -67,7 +68,7 @@ export const cache = {
     try {
       await redis.expire(key, seconds)
     } catch (error) {
-      console.error('Redis expire error:', error)
+      logger.error('Redis expire error', { error: error instanceof Error ? error.message : String(error), key })
     }
   },
 }

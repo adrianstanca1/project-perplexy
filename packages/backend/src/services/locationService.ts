@@ -1,5 +1,6 @@
 import { UserLocation, Coordinates, ActiveUser } from '../types/location.js'
 import { websocketService } from './websocketService.js'
+import logger from '../config/logger.js'
 
 // In-memory storage for demo (replace with database in production)
 const userLocations = new Map<string, UserLocation>()
@@ -53,7 +54,7 @@ export const locationService = {
           websocketService.broadcastLocationUpdate(projectId, projectUsers)
         })
         .catch((error) => {
-          console.error('Failed to broadcast location update:', error)
+          logger.error('Failed to broadcast location update', { error: error.message })
         })
     }
 
@@ -119,6 +120,8 @@ export const locationService = {
 
 // Cleanup inactive users every 5 minutes
 setInterval(() => {
-  locationService.cleanupInactiveUsers().catch(console.error)
+  locationService.cleanupInactiveUsers().catch((error) => {
+    logger.error('Failed to cleanup inactive users', { error: error.message })
+  })
 }, 5 * 60 * 1000)
 
