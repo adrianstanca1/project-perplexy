@@ -569,15 +569,6 @@ npm run prisma:generate
 
 # View database in Prisma Studio
 npm run prisma:studio
-
-# Production: Apply existing migrations
-npx prisma migrate deploy
-
-# Generate Prisma Client
-npm run prisma:generate
-
-# View database in Prisma Studio
-npm run prisma:studio
 ```
 
 ### Redis
