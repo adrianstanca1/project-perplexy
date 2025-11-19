@@ -160,7 +160,7 @@ docker-compose -f docker-compose.prod.yml up -d
 docker-compose exec backend npx prisma migrate deploy
 
 # Optional: Seed database with initial data
-docker-compose exec backend npm run prisma db seed
+docker-compose exec backend npm run prisma:seed
 ```
 
 #### Step 4: Verify Deployment
