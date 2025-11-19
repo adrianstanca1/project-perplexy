@@ -423,7 +423,7 @@ npm run test:unit                    # Run tests
 # Database
 cd packages/backend
 npm run prisma:generate              # Generate client
-npm run prisma migrate deploy        # Run migrations
+npx prisma migrate deploy            # Run migrations
 npm run prisma studio                # Database GUI
 
 # Production
