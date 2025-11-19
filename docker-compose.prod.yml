@@ -4,6 +4,7 @@ services:
     image: mongo:7.0
     container_name: constructai-mongodb
     restart: unless-stopped
+    command: ["--replSet", "rs0", "--bind_ip_all"]
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-admin}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-changeme}
@@ -16,10 +17,12 @@ services:
     networks:
       - constructai-network
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: |
+        mongosh --eval "try { rs.status() } catch(e) { rs.initiate() }"
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      retries: 30
 
   # Redis Cache
   redis:
@@ -49,7 +52,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3001
-      DATABASE_URL: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-changeme}@mongodb:27017/constructai?authSource=admin
+      DATABASE_URL: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-changeme}@mongodb:27017/constructai?authSource=admin&replicaSet=rs0
       REDIS_URL: redis://:${REDIS_PASSWORD:-changeme}@redis:6379
       JWT_SECRET: ${JWT_SECRET:-changeme-in-production}
       FRONTEND_URL: ${FRONTEND_URL:-https://app.constructai.com}
