@@ -249,7 +249,6 @@ Follow platform-specific guides:
 ```bash
 cd packages/backend
 npx prisma migrate deploy
-npm run prisma migrate deploy
 cd ../..
 ```
 
@@ -570,16 +569,15 @@ npm run prisma:generate
 
 # View database in Prisma Studio
 npm run prisma:studio
-npm run prisma migrate dev
 
 # Production: Apply existing migrations
-npm run prisma migrate deploy
+npx prisma migrate deploy
 
 # Generate Prisma Client
-npm run prisma generate
+npm run prisma:generate
 
 # View database in Prisma Studio
-npm run prisma studio
+npm run prisma:studio
 ```
 
 ### Redis
@@ -994,10 +992,6 @@ npm run prisma:studio                     # Open Prisma Studio (GUI)
 # Production (from packages/backend directory)
 npm run prisma:generate                   # Generate Prisma client (after migration)
 npx prisma migrate deploy                 # Apply migrations to production database
-npm run prisma:generate                   # Generate Prisma client (from backend dir)
-npm run prisma:migrate                    # Create migration (from backend dir)
-npx prisma migrate deploy                 # Apply migrations (from backend dir)
-npm run prisma:studio                     # Database GUI (from backend dir)
 
 # Process Management (PM2)
 pm2 start dist/index.js                   # Start app
