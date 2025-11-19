@@ -6,6 +6,7 @@ import path from 'path'
 import { randomUUID } from 'crypto'
 import os from 'os'
 import { executionHistoryService } from './executionHistoryService.js'
+import logger from '../config/logger.js'
 
 const execAsync = promisify(exec)
 
@@ -64,7 +65,7 @@ export const codeExecutionService = {
           executionTime: result.executionTime,
         })
         .catch((error) => {
-          console.error('Failed to save execution history:', error)
+          logger.error('Failed to save execution history:', { error: error.message })
         })
 
       return result
@@ -87,7 +88,7 @@ export const codeExecutionService = {
           executionTime: errorResult.executionTime,
         })
         .catch((err) => {
-          console.error('Failed to save execution history:', err)
+          logger.error('Failed to save execution history:', { error: err.message })
         })
       throw error
     } finally {

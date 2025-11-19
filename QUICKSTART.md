@@ -118,7 +118,7 @@ npm run build
 
 ```bash
 cd packages/backend
-npx prisma migrate deploy
+npm run prisma migrate deploy
 cd ../..
 ```
 
@@ -293,6 +293,9 @@ cd packages/backend
 npm run prisma:studio        # GUI for database
 npm run prisma:migrate       # Create migration
 npm run prisma:seed          # Seed data
+npm run prisma studio        # GUI for database
+npm run prisma migrate dev   # Create migration
+npm run prisma db seed       # Seed data
 ```
 
 ---
@@ -423,8 +426,8 @@ npm run test:unit                    # Run tests
 # Database
 cd packages/backend
 npm run prisma:generate              # Generate client
-npx prisma migrate deploy            # Run migrations
-npm run prisma:studio                # Database GUI
+npm run prisma migrate deploy        # Run migrations
+npm run prisma studio                # Database GUI
 
 # Production
 npm run build                        # Build

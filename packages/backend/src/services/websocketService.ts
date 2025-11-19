@@ -2,6 +2,7 @@ import { WebSocketServer, WebSocket } from 'ws'
 import { Server } from 'http'
 import { ActiveUser } from '../types/location.js'
 import { locationService } from './locationService.js'
+import logger from '../config/logger.js'
 
 interface ClientConnection {
   ws: WebSocket
@@ -22,7 +23,7 @@ export const websocketService = {
     wss.on('connection', (ws: WebSocket, _req) => {
       const userId = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
       
-      console.log(`New WebSocket connection: ${userId}`)
+      logger.info('New WebSocket connection', { userId })
 
       const client: ClientConnection = {
         ws,
@@ -69,22 +70,22 @@ export const websocketService = {
               break
 
             default:
-              console.warn('Unknown message type:', data.type)
+              logger.warn('Unknown message type', { type: data.type })
           }
         } catch (error) {
-          console.error('WebSocket message error:', error)
+          logger.error('WebSocket message error', { error: error instanceof Error ? error.message : String(error) })
         }
       })
 
       // Handle disconnect
       ws.on('close', () => {
-        console.log(`WebSocket disconnected: ${userId}`)
+        logger.info('WebSocket disconnected', { userId })
         clients.delete(userId)
       })
 
       // Handle errors
       ws.on('error', (error) => {
-        console.error(`WebSocket error for ${userId}:`, error)
+        logger.error('WebSocket error', { userId, error: error.message })
         clients.delete(userId)
       })
     })
@@ -122,7 +123,7 @@ export const websocketService = {
       }
     }, 5000) // Every 5 seconds
 
-    console.log('WebSocket server initialized')
+    logger.info('WebSocket server initialized')
   },
 
   /**
