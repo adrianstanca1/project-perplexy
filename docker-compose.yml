@@ -4,16 +4,22 @@ services:
     image: mongo:7.0
     container_name: constructai-mongodb
     restart: unless-stopped
+    command: ["--replSet", "rs0", "--bind_ip_all", "--noauth"]
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-changeme}
       MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-constructai}
     volumes:
       - mongodb_data:/data/db
     networks:
       - constructai-network
+    healthcheck:
+      test: |
+        mongosh --eval "try { rs.status() } catch(e) { rs.initiate() }"
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      retries: 30
 
   # Redis Cache
   redis:
@@ -39,15 +45,17 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3001
-      DATABASE_URL: ${DATABASE_URL:-mongodb://mongodb:27017/constructai}
+      DATABASE_URL: ${DATABASE_URL:-mongodb://mongodb:27017/constructai?replicaSet=rs0}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       JWT_SECRET: ${JWT_SECRET:-change-this-in-production}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
     depends_on:
-      - mongodb
-      - redis
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_started
     volumes:
       - ./packages/backend/uploads:/app/uploads
     networks:
