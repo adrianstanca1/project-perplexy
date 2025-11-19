@@ -565,7 +565,7 @@ npm run prisma migrate dev
 npx prisma migrate deploy
 
 # Generate Prisma Client
-npm run prisma generate
+npm run prisma:generate
 
 # View database in Prisma Studio
 npm run prisma studio
