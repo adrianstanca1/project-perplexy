@@ -226,7 +226,7 @@ packages/frontend/src/
    ```bash
    cd packages/backend
    npm run prisma:generate
-   npm run prisma migrate dev --name add_rbac_and_tasks
+   npx prisma migrate dev --name add_rbac_and_tasks
    ```
 
 2. **Update Existing Endpoints**:
