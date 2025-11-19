@@ -118,7 +118,7 @@ npm run build
 
 ```bash
 cd packages/backend
-npm run prisma migrate deploy
+npx prisma migrate deploy
 cd ../..
 ```
 
@@ -293,9 +293,6 @@ cd packages/backend
 npm run prisma:studio        # GUI for database
 npm run prisma:migrate       # Create migration
 npm run prisma:seed          # Seed data
-npm run prisma studio        # GUI for database
-npm run prisma migrate dev   # Create migration
-npm run prisma db seed       # Seed data
 ```
 
 ---
@@ -405,7 +402,7 @@ Ready for production? See:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:3001
 - API Health: http://localhost:3001/health
-- Prisma Studio: `cd packages/backend && npm run prisma studio`
+- Prisma Studio: `cd packages/backend && npm run prisma:studio`
 
 ---
 
@@ -426,8 +423,8 @@ npm run test:unit                    # Run tests
 # Database
 cd packages/backend
 npm run prisma:generate              # Generate client
-npm run prisma migrate deploy        # Run migrations
-npm run prisma studio                # Database GUI
+npx prisma migrate deploy            # Run migrations
+npm run prisma:studio                # Database GUI
 
 # Production
 npm run build                        # Build
