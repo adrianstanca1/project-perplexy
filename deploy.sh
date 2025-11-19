@@ -89,7 +89,7 @@ deploy_docker() {
     fi
     print_success "Docker is installed"
     
-    if ! command_exists docker-compose && ! docker compose version >/dev/null 2>&1; then
+    if ! docker compose version >/dev/null 2>&1; then
         print_error "Docker Compose is not installed."
         exit 1
     fi
@@ -138,11 +138,11 @@ deploy_docker() {
     
     # Build and start services
     print_info "Building Docker images..."
-    docker-compose -f $COMPOSE_FILE build
+    docker compose -f $COMPOSE_FILE build
     print_success "Images built successfully"
     
     print_info "Starting services..."
-    docker-compose -f $COMPOSE_FILE up -d
+    docker compose -f $COMPOSE_FILE up -d
     print_success "Services started"
     
     # Wait for services to be ready
@@ -151,11 +151,11 @@ deploy_docker() {
     
     # Run database migrations
     print_info "Running database migrations..."
-    docker-compose -f $COMPOSE_FILE exec -T backend sh -c "cd /app && npx prisma migrate deploy" || print_warning "Migrations may have failed or already applied"
+    docker compose -f $COMPOSE_FILE exec -T backend sh -c "cd /app && npx prisma migrate deploy" || print_warning "Migrations may have failed or already applied"
     
     # Check service health
     print_info "Checking service health..."
-    docker-compose -f $COMPOSE_FILE ps
+    docker compose -f $COMPOSE_FILE ps
     
     # Display access information
     print_header "Deployment Complete!"
@@ -168,10 +168,10 @@ deploy_docker() {
     echo -e "  ${GREEN}Health:${NC}    http://localhost:3001/health"
     echo ""
     echo "Useful Commands:"
-    echo "  View logs:        docker-compose -f $COMPOSE_FILE logs -f"
-    echo "  Stop services:    docker-compose -f $COMPOSE_FILE down"
-    echo "  Restart services: docker-compose -f $COMPOSE_FILE restart"
-    echo "  View status:      docker-compose -f $COMPOSE_FILE ps"
+    echo "  View logs:        docker compose -f $COMPOSE_FILE logs -f"
+    echo "  Stop services:    docker compose -f $COMPOSE_FILE down"
+    echo "  Restart services: docker compose -f $COMPOSE_FILE restart"
+    echo "  View status:      docker compose -f $COMPOSE_FILE ps"
     echo ""
     
     # Test health endpoint
@@ -180,7 +180,7 @@ deploy_docker() {
     if curl -f http://localhost:3001/health >/dev/null 2>&1; then
         print_success "Backend is healthy!"
     else
-        print_warning "Backend health check failed. Check logs: docker-compose -f $COMPOSE_FILE logs backend"
+        print_warning "Backend health check failed. Check logs: docker compose -f $COMPOSE_FILE logs backend"
     fi
 }
 
@@ -324,7 +324,7 @@ deploy_development() {
     # Start infrastructure with Docker
     print_info "Starting MongoDB and Redis with Docker..."
     if command_exists docker; then
-        docker-compose up -d mongodb redis
+        docker compose up -d mongodb redis
         print_success "MongoDB and Redis started"
         sleep 5
     else

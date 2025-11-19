@@ -107,17 +107,17 @@ check_docker_services() {
         return
     fi
     
-    # Check if docker-compose is running
-    if docker-compose ps >/dev/null 2>&1; then
+    # Check if docker compose is running
+    if docker compose ps >/dev/null 2>&1; then
         print_check "Docker Compose services"
         
         # Get service status
-        services=$(docker-compose ps --services)
+        services=$(docker compose ps --services)
         running=0
         stopped=0
         
         for service in $services; do
-            status=$(docker-compose ps -q "$service" | xargs docker inspect -f '{{.State.Status}}' 2>/dev/null)
+            status=$(docker compose ps -q "$service" | xargs docker inspect -f '{{.State.Status}}' 2>/dev/null)
             if [ "$status" = "running" ]; then
                 running=$((running + 1))
                 print_pass "$service is running"
@@ -188,9 +188,9 @@ check_frontend() {
 check_database() {
     print_header "Database Connectivity"
     
-    if command -v docker >/dev/null 2>&1 && docker-compose ps -q mongodb >/dev/null 2>&1; then
+    if command -v docker >/dev/null 2>&1 && docker compose ps -q mongodb >/dev/null 2>&1; then
         print_check "MongoDB container"
-        if docker-compose exec -T mongodb mongosh --eval "db.adminCommand('ping')" >/dev/null 2>&1; then
+        if docker compose exec -T mongodb mongosh --eval "db.adminCommand('ping')" >/dev/null 2>&1; then
             print_pass "MongoDB is responsive"
         else
             print_fail "MongoDB is not responsive"
@@ -204,9 +204,9 @@ check_database() {
 check_redis() {
     print_header "Redis Connectivity"
     
-    if command -v docker >/dev/null 2>&1 && docker-compose ps -q redis >/dev/null 2>&1; then
+    if command -v docker >/dev/null 2>&1 && docker compose ps -q redis >/dev/null 2>&1; then
         print_check "Redis container"
-        if docker-compose exec -T redis redis-cli ping | grep -q "PONG"; then
+        if docker compose exec -T redis redis-cli ping | grep -q "PONG"; then
             print_pass "Redis is responsive"
         else
             print_fail "Redis is not responsive"
@@ -322,7 +322,7 @@ print_summary() {
         echo ""
         echo "Next steps:"
         echo "  1. Review failed checks above"
-        echo "  2. Check logs: docker-compose logs -f"
+        echo "  2. Check logs: docker compose logs -f"
         echo "  3. Verify environment configuration in .env"
         echo "  4. See DEPLOYMENT_GUIDE.md for troubleshooting"
         exit 1
