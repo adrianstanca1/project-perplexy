@@ -3,12 +3,18 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl
+
 # Copy package files
 COPY package*.json ./
 COPY tsconfig.json ./
 
+# Copy prisma schema (needed for postinstall hook)
+COPY prisma ./prisma
+
 # Install dependencies
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
@@ -24,12 +30,15 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl
+
 # Copy package files
 COPY package*.json ./
 COPY prisma ./prisma
 
 # Install production dependencies only
-RUN npm ci --only=production
+RUN npm install --production --legacy-peer-deps
 
 # Copy built files
 COPY --from=builder /app/dist ./dist
