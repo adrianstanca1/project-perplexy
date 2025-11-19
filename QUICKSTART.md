@@ -424,7 +424,7 @@ npm run test:unit                    # Run tests
 cd packages/backend
 npm run prisma:generate              # Generate client
 npx prisma migrate deploy            # Run migrations
-npm run prisma studio                # Database GUI
+npm run prisma:studio                # Database GUI
 
 # Production
 npm run build                        # Build
