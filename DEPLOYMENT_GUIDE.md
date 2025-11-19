@@ -559,7 +559,7 @@ db.createUser({
 ```bash
 # Development: Create and apply migrations
 cd packages/backend
-npm run prisma migrate dev
+npm run prisma:migrate
 
 # Production: Apply existing migrations
 npx prisma migrate deploy
