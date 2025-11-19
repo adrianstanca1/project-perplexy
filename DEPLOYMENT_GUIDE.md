@@ -562,7 +562,7 @@ cd packages/backend
 npm run prisma migrate dev
 
 # Production: Apply existing migrations
-npm run prisma migrate deploy
+npx prisma migrate deploy
 
 # Generate Prisma Client
 npm run prisma generate
