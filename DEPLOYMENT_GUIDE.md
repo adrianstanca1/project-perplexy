@@ -157,10 +157,10 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ```bash
 # Run Prisma migrations
-docker-compose exec backend npm run prisma migrate deploy
+docker-compose exec backend npx prisma migrate deploy
 
 # Optional: Seed database with initial data
-docker-compose exec backend npm run prisma db seed
+docker-compose exec backend npm run prisma:seed
 ```
 
 #### Step 4: Verify Deployment
@@ -248,7 +248,7 @@ Follow platform-specific guides:
 
 ```bash
 cd packages/backend
-npm run prisma migrate deploy
+npx prisma migrate deploy
 cd ../..
 ```
 
@@ -559,16 +559,16 @@ db.createUser({
 ```bash
 # Development: Create and apply migrations
 cd packages/backend
-npm run prisma migrate dev
+npm run prisma:migrate
 
 # Production: Apply existing migrations
-npm run prisma migrate deploy
+npx prisma migrate deploy
 
 # Generate Prisma Client
-npm run prisma generate
+npm run prisma:generate
 
 # View database in Prisma Studio
-npm run prisma studio
+npm run prisma:studio
 ```
 
 ### Redis
@@ -975,10 +975,14 @@ docker-compose exec backend sh            # Backend shell
 docker-compose restart backend            # Restart service
 
 # Database
-npm run prisma:generate                   # Generate Prisma client (from backend dir)
-npm run prisma:migrate                    # Create migration (from backend dir)
-npx prisma migrate deploy                 # Apply migrations (from backend dir)
-npm run prisma:studio                     # Database GUI (from backend dir)
+# Development (from packages/backend directory)
+npm run prisma:generate                   # Generate Prisma client
+npm run prisma:migrate                    # Create and apply migration (development only)
+npm run prisma:studio                     # Open Prisma Studio (GUI)
+
+# Production (from packages/backend directory)
+npm run prisma:generate                   # Generate Prisma client (after migration)
+npx prisma migrate deploy                 # Apply migrations to production database
 
 # Process Management (PM2)
 pm2 start dist/index.js                   # Start app
